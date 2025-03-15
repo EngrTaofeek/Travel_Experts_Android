@@ -11,6 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.travelexperts.travelexpertsadmin.R
+import com.travelexperts.travelexpertsadmin.ui.theme.Primary
 
 data class BottomNavItem(
     val title: String,
@@ -33,7 +34,7 @@ fun BottomNavigationBar(navController: NavController) {
     NavigationBar (containerColor = Color.White){
         bottomNavItems.forEach { item ->
             val isSelected = currentDestination?.route == item.route
-            val tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
+            val tint = if (isSelected) Primary else Color.Gray
 
             NavigationBarItem(
                 selected = isSelected,

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.travelexperts.travelexpertsadmin.ui.theme.Primary
 
 @Composable
 fun SolidButton(
@@ -20,7 +21,7 @@ fun SolidButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    buttonColor: Color = MaterialTheme.colorScheme.primary,
+    buttonColor: Color = Primary,
     disabledColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
     textColor: Color = Color.White
 ) {
@@ -49,9 +50,9 @@ fun OutlineButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    borderColor: Color = MaterialTheme.colorScheme.primary,
+    borderColor: Color = Primary,
     disabledBorderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-    textColor: Color = MaterialTheme.colorScheme.primary
+    textColor: Color = Primary
 ) {
     OutlinedButton(
         onClick = onClick,

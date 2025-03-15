@@ -15,6 +15,28 @@ import com.travelexperts.travelexpertsadmin.ui.components.EmailTextField
 import com.travelexperts.travelexpertsadmin.ui.components.OutlineButton
 import com.travelexperts.travelexpertsadmin.ui.components.PasswordTextField
 import com.travelexperts.travelexpertsadmin.ui.components.SolidButton
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import com.travelexperts.travelexpertsadmin.R
+import com.travelexperts.travelexpertsadmin.ui.components.CustomCardView
+import com.travelexperts.travelexpertsadmin.ui.theme.ExploreBackgroundColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ExploreTitleColor
+import com.travelexperts.travelexpertsadmin.ui.theme.MessageBlue
+import com.travelexperts.travelexpertsadmin.ui.theme.ProfileBackgroundColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ProfileTitleColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ReviewBackgroundColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ReviewTitleColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ScanBackgroundColor
+import com.travelexperts.travelexpertsadmin.ui.theme.ScanTitleColor
+import com.travelexperts.travelexpertsadmin.ui.theme.TropicalBlue
+import com.travelexperts.travelexpertsadmin.ui.theme.WalletBackgroundColor
+import com.travelexperts.travelexpertsadmin.ui.theme.WalletTitleColor
+
+
+data class GridItem(val title: String, val description: String,val titleColor: Color, val backgroundColor: Color, val image: Painter)
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -26,26 +48,56 @@ fun HomeScreen(navController: NavController) {
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Home",
-            style = MaterialTheme.typography.headlineMedium
-        )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Login Button
-        SolidButton(
-            text = "Home",
-            onClick = { /* Handle Login Logic */ },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = true
-        )
-
+        GridScreen(navController)
         Spacer(modifier = Modifier.height(12.dp))
 
 
     }
 }
+
+
+
+
+
+
+@Composable
+fun GridScreen(navController: NavController) {
+    val items = listOf(
+        GridItem("Messages", "Send and receive messages from customer .", MessageBlue,
+            TropicalBlue, painterResource(id = R.drawable.messages)),
+        GridItem("Explore Attractions", "Explore tourist locations in different cities",
+            ExploreTitleColor, ExploreBackgroundColor, painterResource(id = R.drawable.attractions)),
+        GridItem("Review Agents", "Review Pending agents and approve .",
+            ReviewTitleColor, ReviewBackgroundColor, painterResource(id = R.drawable.review)),
+        GridItem("Profile", "View and edit your profile with recent updates.", ProfileTitleColor,
+            ProfileBackgroundColor, painterResource(id = R.drawable.dashboard_profile)),
+        GridItem("Scan Booking", "This feature is coming soon and not yet available.", ScanTitleColor, ScanBackgroundColor, painterResource(id = R.drawable.dashboard_scan)),
+        GridItem("Suppliers", "View and manage all your suppliers.", WalletTitleColor,
+            WalletBackgroundColor, painterResource(id = R.drawable.wallet))
+    )
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2), // 2 Columns
+        state = rememberLazyGridState(),
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(items.size) { index ->
+            CustomCardView(
+                title = items[index].title,
+                description = items[index].description,
+                titleColor = items[index].titleColor,
+                cardBackGroundColor = items[index].backgroundColor,
+                image = items[index].image
+            ){
+//                navController.navigate("replace_this_with_the_route_name")
+                navController.navigate("suppliers")
+            }
+        }
+    }
+}
+

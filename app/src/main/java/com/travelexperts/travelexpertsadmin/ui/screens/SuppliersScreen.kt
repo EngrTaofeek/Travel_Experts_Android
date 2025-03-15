@@ -1,5 +1,6 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,17 +21,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.travelexperts.travelexpertsadmin.R
-import com.travelexperts.travelexpertsadmin.data.Product
-import com.travelexperts.travelexpertsadmin.ui.theme.Primary
+import com.travelexperts.travelexpertsadmin.data.Supplier
 
 @Composable
-fun ProductsScreen(navController: NavController) {
-    var products by remember {
+fun SuppliersScreen(navController: NavController) {
+    var suppliers by remember {
         mutableStateOf(
             listOf(
-                Product(1, "Laptop"),
-                Product(2, "Smartphone"),
-                Product(3, "Headphones")
+                Supplier(1, "Global Supplies"),
+                Supplier(2, "Tech Solutions"),
+                Supplier(3, "Luxury Brands")
             )
         )
     }
@@ -38,10 +39,10 @@ fun ProductsScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(products) { product ->
-            ProductCard(product) { updatedName ->
-                products = products.map {
-                    if (it.productId == product.productId) it.copy(prodName = updatedName) else it
+        items(suppliers) { supplier ->
+            SupplierCard(supplier) { updatedName ->
+                suppliers = suppliers.map {
+                    if (it.supplierId == supplier.supplierId) it.copy(supName = updatedName) else it
                 }
             }
         }
@@ -49,7 +50,7 @@ fun ProductsScreen(navController: NavController) {
 }
 
 @Composable
-fun ProductCard(product: Product, onNameChange: (String) -> Unit) {
+fun SupplierCard(supplier: Supplier, onNameChange: (String) -> Unit) {
     var isEditMode by remember { mutableStateOf(false) }
 
     Card(
@@ -59,27 +60,25 @@ fun ProductCard(product: Product, onNameChange: (String) -> Unit) {
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             // Default Icon
-//            Image(
-//                painter = painterResource(id = R.drawable.ic_product),
-//                contentDescription = "Product Icon",
-//                modifier = Modifier.size(50.dp)
-//            )
-
-            Icon(painter = painterResource(id = R.drawable.ic_products), contentDescription = "Product Icon", tint = Primary, modifier = Modifier.size(50.dp))
+            Image(
+                painter = painterResource(id = R.drawable.mdi_truck),
+                contentDescription = "Supplier Icon",
+                modifier = Modifier.size(50.dp)
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             // Editable TextField
             if (isEditMode) {
                 OutlinedTextField(
-                    value = product.prodName,
+                    value = supplier.supName,
                     onValueChange = onNameChange,
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
                 )
             } else {
-                Text(product.prodName, style = MaterialTheme.typography.headlineSmall)
+                Text(supplier.supName, style = MaterialTheme.typography.headlineSmall)
             }
 
             Spacer(modifier = Modifier.width(8.dp))

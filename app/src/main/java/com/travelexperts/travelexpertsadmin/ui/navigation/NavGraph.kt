@@ -9,15 +9,18 @@ import com.travelexperts.travelexpertsadmin.ui.screens.CustomersScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.HomeScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.LoginScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.OnboardingScreen
+import com.travelexperts.travelexpertsadmin.ui.screens.PackageDetailScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.PackagesScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.ProductsScreen
+import com.travelexperts.travelexpertsadmin.ui.screens.ProfileScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.RegisterScreen
+import com.travelexperts.travelexpertsadmin.ui.screens.SuppliersScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier) {
     NavHost(
         navController = navController,
-        startDestination = "onboarding",
+        startDestination = "home",
         modifier = modifier
 
     ) {
@@ -35,7 +38,14 @@ fun NavGraph(navController: NavHostController, modifier: Modifier) {
         composable("home") { HomeScreen(navController) }
         composable("packages") { PackagesScreen(navController) }
         composable("products") { ProductsScreen(navController) }
+        composable("suppliers") { SuppliersScreen(navController) }
         composable("customers") { CustomersScreen(navController) }
+        composable("profile") { ProfileScreen(navController) }
+        composable("packageDetail/{packageId}") { backStackEntry ->
+            val packageId = backStackEntry.arguments?.getString("packageId")?.toIntOrNull() ?: 0
+            PackageDetailScreen(navController, packageId)
+        }
+
 
     }
 }

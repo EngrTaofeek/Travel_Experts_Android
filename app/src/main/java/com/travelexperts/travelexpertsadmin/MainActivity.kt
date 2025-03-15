@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
             val currentRoute = navBackStackEntry.value?.destination?.route
             val showBottomBar = currentRoute in listOf("home", "packages", "products", "customers")
             val showProfileAppBar = currentRoute in listOf("home", "packages", "products", "customers")
-            val showBackButtonAppBar = currentRoute in listOf("onboarding", "login", "register") && !showProfileAppBar
+            val showBackButtonAppBar = currentRoute !in listOf("onboarding", "login", "register") && !showProfileAppBar
 
 
             TravelExpertsAdminTheme {
