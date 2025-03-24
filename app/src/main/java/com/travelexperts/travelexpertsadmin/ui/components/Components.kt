@@ -4,9 +4,12 @@ package com.travelexperts.travelexpertsadmin.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +19,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.travelexperts.travelexpertsadmin.data.Agent
+import com.travelexperts.travelexpertsadmin.data.Booking
+import com.travelexperts.travelexpertsadmin.data.Customer
 import com.travelexperts.travelexpertsadmin.data.getStatusColor
 
 @Composable
@@ -125,4 +131,98 @@ fun ProfileField(
 
     Spacer(modifier = Modifier.height(8.dp))
 }
+
+@Composable
+fun CustomerCard(
+    customer: Customer,
+    onViewBookings: () -> Unit,
+    onViewEditCustomer: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable { onViewEditCustomer() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Person, contentDescription = "Customer", modifier = Modifier.size(48.dp))
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text("${customer.custFirstName} ${customer.custLastName}", style = MaterialTheme.typography.titleMedium)
+                Text(customer.custEmail, style = MaterialTheme.typography.bodySmall)
+            }
+
+            Column {
+                Button(onClick = onViewBookings, contentPadding = PaddingValues(6.dp)) {
+                    Text("Bookings")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BookingCard(booking: Booking, onEdit: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Booking #: ${booking.bookingNo ?: "N/A"}", style = MaterialTheme.typography.titleMedium)
+            Text("Date: ${booking.bookingDate}")
+            Text("Travelers: ${booking.travelerCount}")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(onClick = onEdit) {
+                Text("Edit Booking")
+            }
+        }
+    }
+}
+
+@Composable
+fun AgentApprovalItem(agent: Agent, onApprove: () -> Unit, onReject: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = agent.name, style = MaterialTheme.typography.bodyLarge)
+            Text(text = agent.email, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = onApprove,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50), // Green
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Approve")
+                }
+
+                Button(
+                    onClick = onReject,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF44336), // Red
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Reject")
+                }
+            }
+        }
+    }
+}
+
+
 

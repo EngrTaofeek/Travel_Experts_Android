@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import com.travelexperts.travelexpertsadmin.R
 import com.travelexperts.travelexpertsadmin.ui.components.CustomCardView
+import com.travelexperts.travelexpertsadmin.ui.navigation.Routes
 import com.travelexperts.travelexpertsadmin.ui.theme.ExploreBackgroundColor
 import com.travelexperts.travelexpertsadmin.ui.theme.ExploreTitleColor
 import com.travelexperts.travelexpertsadmin.ui.theme.MessageBlue
@@ -36,7 +37,7 @@ import com.travelexperts.travelexpertsadmin.ui.theme.WalletBackgroundColor
 import com.travelexperts.travelexpertsadmin.ui.theme.WalletTitleColor
 
 
-data class GridItem(val title: String, val description: String,val titleColor: Color, val backgroundColor: Color, val image: Painter)
+data class GridItem(val title: String, val description: String,val titleColor: Color, val backgroundColor: Color, val image: Painter, val navPath: String)
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -57,25 +58,22 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-
-
-
-
-
 @Composable
 fun GridScreen(navController: NavController) {
     val items = listOf(
         GridItem("Messages", "Send and receive messages from customer .", MessageBlue,
-            TropicalBlue, painterResource(id = R.drawable.messages)),
+            TropicalBlue, painterResource(id = R.drawable.messages), Routes.MESSAGES),
         GridItem("Explore Attractions", "Explore tourist locations in different cities",
-            ExploreTitleColor, ExploreBackgroundColor, painterResource(id = R.drawable.attractions)),
+            ExploreTitleColor, ExploreBackgroundColor, painterResource(id = R.drawable.attractions),
+            Routes.TOURIST_ACTIONS),
         GridItem("Review Agents", "Review Pending agents and approve .",
-            ReviewTitleColor, ReviewBackgroundColor, painterResource(id = R.drawable.review)),
+            ReviewTitleColor, ReviewBackgroundColor, painterResource(id = R.drawable.review), Routes.REVIEW_AGENTS),
         GridItem("Profile", "View and edit your profile with recent updates.", ProfileTitleColor,
-            ProfileBackgroundColor, painterResource(id = R.drawable.dashboard_profile)),
-        GridItem("Scan Booking", "This feature is coming soon and not yet available.", ScanTitleColor, ScanBackgroundColor, painterResource(id = R.drawable.dashboard_scan)),
+            ProfileBackgroundColor, painterResource(id = R.drawable.dashboard_profile), Routes.PROFILE),
+        GridItem("Scan Booking", "This feature is coming soon and not yet available.", ScanTitleColor, ScanBackgroundColor, painterResource(id = R.drawable.dashboard_scan),
+            ""),
         GridItem("Suppliers", "View and manage all your suppliers.", WalletTitleColor,
-            WalletBackgroundColor, painterResource(id = R.drawable.wallet))
+            WalletBackgroundColor, painterResource(id = R.drawable.wallet), "")
     )
 
     LazyVerticalGrid(
@@ -94,8 +92,11 @@ fun GridScreen(navController: NavController) {
                 cardBackGroundColor = items[index].backgroundColor,
                 image = items[index].image
             ){
-//                navController.navigate("replace_this_with_the_route_name")
-                navController.navigate("suppliers")
+                if (items[index].navPath.isNotEmpty()) {
+                    navController.navigate(items[index].navPath)
+                } else {
+
+                }
             }
         }
     }

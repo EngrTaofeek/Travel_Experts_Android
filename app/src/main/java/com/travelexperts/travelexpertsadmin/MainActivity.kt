@@ -19,6 +19,7 @@ import com.travelexperts.travelexpertsadmin.ui.components.BackButtonAppBar
 import com.travelexperts.travelexpertsadmin.ui.components.ProfileAppBar
 import com.travelexperts.travelexpertsadmin.ui.navigation.BottomNavigationBar
 import com.travelexperts.travelexpertsadmin.ui.navigation.NavGraph
+import com.travelexperts.travelexpertsadmin.ui.navigation.Routes
 import com.travelexperts.travelexpertsadmin.ui.theme.TravelExpertsAdminTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,9 +42,32 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val navBackStackEntry = navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry.value?.destination?.route
-            val showBottomBar = currentRoute in listOf("home", "packages", "products", "customers")
-            val showProfileAppBar = currentRoute in listOf("home", "packages", "products", "customers")
-            val showBackButtonAppBar = currentRoute !in listOf("onboarding", "login", "register") && !showProfileAppBar
+            val showBottomBar = currentRoute in listOf(
+                Routes.HOME, Routes.PACKAGES, Routes.PRODUCTS, Routes.MANAGE_CUSTOMERS
+            )
+
+            val showProfileAppBar = currentRoute in listOf(
+                Routes.HOME
+            )
+
+            val showBackButtonAppBar = currentRoute !in listOf(
+                Routes.ONBOARDING, Routes.LOGIN, Routes.REGISTER
+            ) && !showProfileAppBar
+
+            val routeTitle = when {
+                currentRoute?.startsWith(Routes.EDIT_CUSTOMER) == true -> "Edit Customer"
+                currentRoute?.startsWith(Routes.PACKAGE_DETAIL) == true -> "Package Detail"
+                currentRoute?.startsWith(Routes.EDIT_BOOKING) == true -> "Edit Booking"
+                currentRoute?.startsWith(Routes.MANAGE_CUSTOMERS) == true -> "Customers"
+                currentRoute?.startsWith(Routes.PACKAGES) == true -> "Packages"
+                currentRoute?.startsWith(Routes.PRODUCTS) == true -> "Product"
+                currentRoute?.startsWith(Routes.CUSTOMER_BOOKINGS) == true -> "Customer Bookings"
+                currentRoute == Routes.MESSAGES -> "Messages"
+                currentRoute?.startsWith(Routes.CHAT) == true -> "Chat"
+                currentRoute == Routes.REVIEW_AGENTS -> "Review Agents"
+                currentRoute == Routes.TOURIST_ACTIONS -> "Tourist Attractions"
+                else -> "Header"
+            }
 
 
             TravelExpertsAdminTheme {
@@ -59,7 +83,7 @@ class MainActivity : ComponentActivity() {
                             )
 
                             showBackButtonAppBar -> BackButtonAppBar(
-                                title = "Header",
+                                title = routeTitle,
                                 backgroundImage = painterResource(id = R.drawable.app_bar_background),
                                 navController = navController
                             )
@@ -76,25 +100,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-@Composable
-fun MyApp() {
-    val navController = rememberNavController()
-//    NavGraph(navController, androidx.compose.ui.Modifier.Companion.padding(paddingValues))
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TravelExpertsAdminTheme {
-        Greeting("Teekay android")
-    }
 }

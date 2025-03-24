@@ -1,3 +1,6 @@
+
+// Top of build.gradle (app)
+//val MAPS_API_KEY: String = project.findProperty("MAPS_API_KEY") as String
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +17,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+//        manifestPlaceholders["MAPS_API_KEY"] = MAPS_API_KEY
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,6 +56,9 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.navigation:navigation-compose:2.7.2")
     implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.maps.android:maps-compose:2.11.2")
+
 
     implementation("androidx.activity:activity-compose:1.7.2") // Required for Image Picker
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1") // Required for ViewModel
