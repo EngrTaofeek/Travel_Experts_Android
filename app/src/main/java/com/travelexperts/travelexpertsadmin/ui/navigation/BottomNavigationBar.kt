@@ -20,10 +20,10 @@ data class BottomNavItem(
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem("Home", R.drawable.ic_home, "home"),
-    BottomNavItem("Packages", R.drawable.ic_packages, "packages"),
-    BottomNavItem("Products", R.drawable.ic_products, "products"),
-    BottomNavItem("Customers", R.drawable.ic_customers, "customers")
+    BottomNavItem("Home", R.drawable.ic_home, Routes.HOME),
+    BottomNavItem("Packages", R.drawable.ic_packages, Routes.PACKAGES),
+    BottomNavItem("Products", R.drawable.ic_products, Routes.PRODUCTS),
+    BottomNavItem("Customers", R.drawable.ic_customers, Routes.MANAGE_CUSTOMERS)
 )
 
 @Composable
