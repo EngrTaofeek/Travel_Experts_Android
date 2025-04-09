@@ -1,10 +1,10 @@
-
 // Top of build.gradle (app)
-//val MAPS_API_KEY: String = project.findProperty("MAPS_API_KEY") as String
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.kapt) // Use the kapt plugin alias
 }
 
 android {
@@ -17,8 +17,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-//        manifestPlaceholders["MAPS_API_KEY"] = MAPS_API_KEY
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -59,10 +57,22 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.maps.android:maps-compose:2.11.2")
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // ViewModel integration
+    implementation(libs.hilt.navigation.compose) // Use the alias
 
     implementation("androidx.activity:activity-compose:1.7.2") // Required for Image Picker
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1") // Required for ViewModel
     implementation(libs.androidx.animation.core.lint)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.coroutines.core)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,3 +81,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+kapt {
+    correctErrorTypes = true
+}
+
+//configurations.all {
+//    resolutionStrategy {
+//        force(libs.javapoet) // Use the alias
+//    }
+//}

@@ -1,120 +1,108 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.travelexperts.travelexpertsadmin.data.Customer
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.CustomerViewModel
+
 
 @Composable
-fun EditCustomerScreen(navController: NavController, customerId: Int) {
-    // Sample data - replace with real data source or ViewModel
-    var customer by remember {
-        mutableStateOf(
-            Customer(
-                customerId,
-                "John", "Doe", "123 Main St", "Calgary", "AB", "T1X1Y1",
-                "Canada", "4031112222", "4032223333", "john@example.com", agentId = 1
-            )
-        )
+fun EditCustomerScreen(navController: NavController, customerId: Int, viewModel: CustomerViewModel = hiltViewModel()) {
+    val state by viewModel.selectedCustomer.collectAsState()
+    val updateState by viewModel.updateCustomerState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(customerId) {
+        viewModel.fetchCustomer(customerId)
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())) {
+    state?.let {
+        when (it) {
+            is NetworkResult.Loading -> CircularProgressIndicator()
+            is NetworkResult.Failure -> Text("Error: ${(it as NetworkResult.Failure).message}")
+            is NetworkResult.Success -> {
+                var customer by remember { mutableStateOf(it.data) }
 
-        Text("Edit Customer", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text("Edit Customer", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = customer.custFirstName,
-            onValueChange = { customer = customer.copy(custFirstName = it) },
-            label = { Text("First Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custfirstname, onValueChange = {
+                        customer = customer.copy(custfirstname = it)
+                    }, label = { Text("First Name") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custLastName,
-            onValueChange = { customer = customer.copy(custLastName = it) },
-            label = { Text("Last Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custlastname, onValueChange = {
+                        customer = customer.copy(custlastname = it)
+                    }, label = { Text("Last Name") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custEmail,
-            onValueChange = { customer = customer.copy(custEmail = it) },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custemail, onValueChange = {
+                        customer = customer.copy(custemail = it)
+                    }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custAddress,
-            onValueChange = { customer = customer.copy(custAddress = it) },
-            label = { Text("Address") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custaddress, onValueChange = {
+                        customer = customer.copy(custaddress = it)
+                    }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custCity,
-            onValueChange = { customer = customer.copy(custCity = it) },
-            label = { Text("City") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custcity, onValueChange = {
+                        customer = customer.copy(custcity = it)
+                    }, label = { Text("City") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custProv,
-            onValueChange = { customer = customer.copy(custProv = it) },
-            label = { Text("Province") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custprov, onValueChange = {
+                        customer = customer.copy(custprov = it)
+                    }, label = { Text("Province") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custPostal,
-            onValueChange = { customer = customer.copy(custPostal = it) },
-            label = { Text("Postal Code") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custpostal, onValueChange = {
+                        customer = customer.copy(custpostal = it)
+                    }, label = { Text("Postal Code") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custHomePhone ?: "",
-            onValueChange = { customer = customer.copy(custHomePhone = it) },
-            label = { Text("Home Phone") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custhomephone ?: "", onValueChange = {
+                        customer = customer.copy(custhomephone = it)
+                    }, label = { Text("Home Phone") }, modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = customer.custBusPhone,
-            onValueChange = { customer = customer.copy(custBusPhone = it) },
-            label = { Text("Business Phone") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                    OutlinedTextField(value = customer.custbusphone, onValueChange = {
+                        customer = customer.copy(custbusphone = it)
+                    }, label = { Text("Business Phone") }, modifier = Modifier.fillMaxWidth())
 
-        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                // TODO: Save updated customer to DB
-                navController.popBackStack()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save Changes")
+                    Button(onClick = {
+                        viewModel.updateCustomer(customer)
+                    }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Save")
+                    }
+                }
+
+                // Show result of update
+                LaunchedEffect(updateState) {
+                    when (updateState) {
+                        is NetworkResult.Success -> Toast.makeText(context, "Customer updated", Toast.LENGTH_SHORT).show()
+                        is NetworkResult.Failure -> Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                        else -> {}
+                    }
+                }
+            }
         }
     }
 }
