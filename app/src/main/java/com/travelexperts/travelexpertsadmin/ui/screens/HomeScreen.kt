@@ -73,7 +73,7 @@ fun GridScreen(navController: NavController) {
         GridItem("Scan Booking", "This feature is coming soon and not yet available.", ScanTitleColor, ScanBackgroundColor, painterResource(id = R.drawable.dashboard_scan),
             ""),
         GridItem("Suppliers", "View and manage all your suppliers.", WalletTitleColor,
-            WalletBackgroundColor, painterResource(id = R.drawable.wallet), "")
+            WalletBackgroundColor, painterResource(id = R.drawable.wallet), Routes.SUPPLIERS)
     )
 
     LazyVerticalGrid(

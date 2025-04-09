@@ -17,6 +17,7 @@ import com.travelexperts.travelexpertsadmin.ui.components.EmailTextField
 import com.travelexperts.travelexpertsadmin.ui.components.OutlineButton
 import com.travelexperts.travelexpertsadmin.ui.components.PasswordTextField
 import com.travelexperts.travelexpertsadmin.ui.components.SolidButton
+import com.travelexperts.travelexpertsadmin.ui.navigation.Routes
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -59,7 +60,7 @@ fun LoginScreen(navController: NavController) {
         // Login Button
         SolidButton(
             text = "Login",
-            onClick = { navController.navigate("home") },
+            onClick = { navController.navigate(Routes.HOME) },
             modifier = Modifier.fillMaxWidth(),
             enabled = email.isNotEmpty() && password.isNotEmpty()
         )
@@ -69,7 +70,7 @@ fun LoginScreen(navController: NavController) {
         // Register Button
         OutlineButton(
             text = "Register",
-            onClick = { navController.navigate("register") },
+            onClick = { navController.navigate(Routes.REGISTER) },
             modifier = Modifier.fillMaxWidth()
         )
     }

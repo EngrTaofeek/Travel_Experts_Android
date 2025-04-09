@@ -12,22 +12,43 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.travelexperts.travelexpertsadmin.data.Agent
+import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.ui.components.AgentApprovalItem
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.AgentViewModel
+import kotlin.collections.get
 
 @Composable
-fun PendingAgentsScreen(navController: NavHostController) {
-    var agents by remember {
-        mutableStateOf(
-            listOf(
-                Agent(1, "Sarah Connor", "sarah@example.com"),
-                Agent(2, "James Bond", "james.bond@mi6.gov"),
-                Agent(3, "Lara Croft", "lara@tombraider.com")
-            ).filter { it.status == "Pending" }
-        )
+fun PendingAgentsScreen(navController: NavHostController,viewModel: AgentViewModel = hiltViewModel()) {
+    val agentState by viewModel.agentState.collectAsState()
+
+    when (agentState) {
+        is NetworkResult.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        is NetworkResult.Success -> {
+            AgentListScreen((agentState as NetworkResult.Success<List<Agent>>).data)
+        }
+        is NetworkResult.Failure -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = (agentState as NetworkResult.Failure).message, color = Color.Red)
+            }
+        }
     }
 
+
+}
+
+@Composable
+fun AgentListScreen(agents: List<Agent>) {
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
@@ -40,17 +61,14 @@ fun PendingAgentsScreen(navController: NavHostController) {
                 AgentApprovalItem(
                     agent = agents[index],
                     onApprove = {
-                        agents = agents.map {
-                            if (it.id == agents[index].id) it.copy(status = "Approved") else it
-                        }
+                        //Call viewmodel to update agent
                     },
                     onReject = {
-                        agents = agents.map {
-                            if (it.id == agents[index].id) it.copy(status = "Rejected") else it
-                        }
+                        //Call viewmodel to update agent
                     }
                 )
             }
         }
     }
+
 }

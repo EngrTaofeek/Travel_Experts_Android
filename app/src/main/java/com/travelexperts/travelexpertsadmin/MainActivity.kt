@@ -21,9 +21,11 @@ import com.travelexperts.travelexpertsadmin.ui.navigation.BottomNavigationBar
 import com.travelexperts.travelexpertsadmin.ui.navigation.NavGraph
 import com.travelexperts.travelexpertsadmin.ui.navigation.Routes
 import com.travelexperts.travelexpertsadmin.ui.theme.TravelExpertsAdminTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

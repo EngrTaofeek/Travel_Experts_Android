@@ -1,30 +1,48 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.travelexperts.travelexpertsadmin.data.Booking
 import com.travelexperts.travelexpertsadmin.ui.components.BookingCard
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.CustomerViewModel
 
 @Composable
-fun CustomerBookingsScreen(navController: NavController, customerId: Int) {
-    var bookings = listOf(
-                Booking(1, "2025-06-01", "BK101", 2.0, customerId, "L", 1),
-                Booking(2, "2025-07-10", "BK102", 1.0, customerId, "A", 2)
-            )
+fun CustomerBookingsScreen(navController: NavController, customerId: Int, viewModel: CustomerViewModel = hiltViewModel()) {
+    val bookings by viewModel.bookings.collectAsState()
 
+    LaunchedEffect(customerId) {
+        viewModel.fetchBookings(customerId)
+    }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        items(bookings.size) { index ->
-            BookingCard(booking = bookings[index]) {
-                navController.navigate("editBooking/${bookings[index].bookingId}")
-                // You can make booking fields editable here if needed
+    bookings?.let {
+        when (it) {
+            is NetworkResult.Loading -> CircularProgressIndicator()
+            is NetworkResult.Failure -> Text("Error: ${(it as NetworkResult.Failure).message}")
+            is NetworkResult.Success -> {
+
+                val data = it.data
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    items(data.size) { index ->
+                        BookingCard(booking = data[index]) {
+                            navController.navigate("editBooking/${data[index].bookingNo}")
+                            // You can make booking fields editable here if needed
+                        }
+                    }
+                }
+
             }
         }
     }
 }
+

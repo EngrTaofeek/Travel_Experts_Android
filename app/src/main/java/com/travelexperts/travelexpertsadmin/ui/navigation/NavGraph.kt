@@ -28,7 +28,7 @@ import com.travelexperts.travelexpertsadmin.ui.screens.TouristAttractionsScreen
 fun NavGraph(navController: NavHostController, modifier: Modifier) {
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME,
+        startDestination = Routes.PRODUCTS,
         modifier = modifier
     ) {
         composable(Routes.ONBOARDING) { OnboardingScreen(navController) }
@@ -59,7 +59,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier) {
         }
 
         composable("${Routes.EDIT_BOOKING}/{bookingId}") { backStackEntry ->
-            val bookingId = backStackEntry.arguments?.getString("bookingId")?.toInt() ?: 0
+            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: " "
             EditBookingScreen(navController, bookingId)
         }
 

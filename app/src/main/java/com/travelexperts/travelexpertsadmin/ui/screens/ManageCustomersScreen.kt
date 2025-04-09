@@ -1,31 +1,49 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.travelexperts.travelexpertsadmin.data.Customer
+import com.travelexperts.travelexpertsadmin.data.api.response.Customer
 import com.travelexperts.travelexpertsadmin.ui.components.CustomerCard
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.CustomerViewModel
 
 @Composable
-fun ManageCustomersScreen(navController: NavController) {
-    var customers = listOf(
-                Customer(1, "John", "Doe", "123 Main St", "New York", "NY", "10001", "USA", "1234567890", "0987654321", "john@example.com", 101),
-                Customer(2, "Jane", "Smith", "456 Elm St", "Los Angeles", "CA", "90001", "USA", null, "1231231234", "jane@example.com", 102)
-            )
+fun ManageCustomersScreen(navController: NavController, viewModel: CustomerViewModel = hiltViewModel()) {
+    val customerState by viewModel.customers.collectAsState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        items(customers.size) { index ->
-            CustomerCard(customer = customers[index], onViewBookings = {
-                navController.navigate("customerBookings/${customers[index].customerId}")
-            }) {
-                navController.navigate("editCustomer/${customers[index].customerId}")
-            }
+    when (customerState) {
+        is NetworkResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        is NetworkResult.Failure -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text((customerState as NetworkResult.Failure).message, color = Color.Red)
+        }
+
+        is NetworkResult.Success -> LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            val customers = (customerState as NetworkResult.Success<List<Customer>>).data
+
+                items(customers.size) { index ->
+                    CustomerCard(customer = customers[index], onViewBookings = {
+                        navController.navigate("customerBookings/${customers[index].id}")
+                    }) {
+                        navController.navigate("editCustomer/${customers[index].id}")
+                    }
+                }
+
+
         }
     }
 }
+

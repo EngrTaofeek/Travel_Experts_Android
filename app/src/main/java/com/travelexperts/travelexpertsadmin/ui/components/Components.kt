@@ -16,12 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.travelexperts.travelexpertsadmin.data.Agent
-import com.travelexperts.travelexpertsadmin.data.Booking
-import com.travelexperts.travelexpertsadmin.data.Customer
+import com.travelexperts.travelexpertsadmin.data.api.response.Agent
+import com.travelexperts.travelexpertsadmin.data.api.response.Booking
+import com.travelexperts.travelexpertsadmin.data.api.response.Customer
 import com.travelexperts.travelexpertsadmin.data.getStatusColor
 
 @Composable
@@ -152,8 +151,8 @@ fun CustomerCard(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text("${customer.custFirstName} ${customer.custLastName}", style = MaterialTheme.typography.titleMedium)
-                Text(customer.custEmail, style = MaterialTheme.typography.bodySmall)
+                Text("${customer.custfirstname} ${customer.custlastname}", style = MaterialTheme.typography.titleMedium)
+                Text(customer.custemail, style = MaterialTheme.typography.bodySmall)
             }
 
             Column {
@@ -174,7 +173,7 @@ fun BookingCard(booking: Booking, onEdit: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Booking #: ${booking.bookingNo ?: "N/A"}", style = MaterialTheme.typography.titleMedium)
-            Text("Date: ${booking.bookingDate}")
+            Text("Date: ${booking.savedAt}")
             Text("Travelers: ${booking.travelerCount}")
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -194,8 +193,8 @@ fun AgentApprovalItem(agent: Agent, onApprove: () -> Unit, onReject: () -> Unit)
         shape = RoundedCornerShape(10.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = agent.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = agent.email, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(text = agent.agtfirstname, style = MaterialTheme.typography.bodyLarge)
+            Text(text = agent.agtemail, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(8.dp))
 
