@@ -28,7 +28,7 @@ import com.travelexperts.travelexpertsadmin.ui.screens.TouristAttractionsScreen
 fun NavGraph(navController: NavHostController, modifier: Modifier) {
     NavHost(
         navController = navController,
-        startDestination = Routes.PRODUCTS,
+        startDestination = Routes.ONBOARDING,
         modifier = modifier
     ) {
         composable(Routes.ONBOARDING) { OnboardingScreen(navController) }
