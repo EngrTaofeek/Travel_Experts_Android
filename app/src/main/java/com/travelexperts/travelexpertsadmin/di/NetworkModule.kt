@@ -11,14 +11,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+//const val BASE_URL = "http://10.0.2.2:8080/" //emulator
+const val BASE_URL = "http://192.168.1.67:8080/" //physical device specific to each laptop and wifi
 // 4. di/NetworkModule.kt
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
-    fun provideBaseUrl() = "http://10.0.2.2:8080/" // For emulator to access localhost
 
+    //for physical device always run ipconfig to see the base url of the laptop
+    @Provides
+    fun provideBaseUrl() = BASE_URL
     @Provides
     @Singleton
     fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()

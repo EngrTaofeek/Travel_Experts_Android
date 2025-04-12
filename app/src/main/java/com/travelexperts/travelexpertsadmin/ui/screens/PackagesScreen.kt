@@ -19,43 +19,61 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.travelexperts.travelexpertsadmin.R
-import com.travelexperts.travelexpertsadmin.data.PackageData
+import com.travelexperts.travelexpertsadmin.data.api.response.PackageData
+import com.travelexperts.travelexpertsadmin.data.api.response.Product
+import com.travelexperts.travelexpertsadmin.di.BASE_URL
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.PackageViewModel
+import com.travelexperts.travelexpertsadmin.viewmodels.ProductViewModel
 
 @Composable
-fun PackagesScreen(navController: NavController) {
-    val packages = listOf(
-        PackageData(
-            1,
-            "Beach Getaway",
-            "2025-06-10",
-            "2025-06-20",
-            "Enjoy a tropical getaway",
-            2000.0,
-            300.0,
-            "https://firebasestorage.googleapis.com/v0/b/cita-e1639.appspot.com/o/uploads%2F1599745875218.jpg?alt=media&token=57624349-bd26-4cbe-9ed7-30076c8c920e",
-            "info@beachresort.com"
-        ),
-        PackageData(2, "Mountain Adventure", "2025-07-15", "2025-07-25", "Explore the mountains", 2500.0, 350.0, "https://firebasestorage.googleapis.com/v0/b/cita-e1639.appspot.com/o/uploads%2F1599745875218.jpg?alt=media&token=57624349-bd26-4cbe-9ed7-30076c8c920e", "info@mountaintrips.com"),
-    )
+fun PackagesScreen(
+    navController: NavController,
+    viewModel: PackageViewModel = hiltViewModel()
+) {
+    val state by viewModel.packageListState.collectAsState()
 
+    when (state) {
+        is NetworkResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+
+        is NetworkResult.Success -> {
+            val packages = (state as NetworkResult.Success<List<PackageData>>).data
+            PackagesList(packages, navController)
+
+        }
+
+        is NetworkResult.Failure -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = (state as NetworkResult.Failure).message, color = Color.Red)
+        }
+    }
+}
+@Composable
+fun PackagesList(packages: List<PackageData>, navController: NavController) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(packages.size) { index ->
-            PackageCard(packageData = packages[index], onClick = {
-                navController.navigate("packageDetail/${packages[index].packageId}")
-            })
+        items(packages) { pkg ->
+            PackageCard(pkg) {
+                navController.navigate("packageDetail/${pkg.id}")
+            }
         }
     }
 }
@@ -64,27 +82,22 @@ fun PackagesScreen(navController: NavController) {
 fun PackageCard(packageData: PackageData, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(8.dp)
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Package Image
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = packageData.imagePath,
+                model = packageData.imageUrl?.let { if (it.startsWith("/")) "${BASE_URL.dropLast(1)}$it" else it }
+                    ?: R.drawable.default_package,
                 contentDescription = "Package Image",
                 modifier = Modifier.size(80.dp)
             )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Package Info
+            Spacer(Modifier.width(12.dp))
             Column {
-                Text(packageData.pkgName, style = MaterialTheme.typography.headlineSmall)
-                Text("Price: $${packageData.pkgBasePrice}", style = MaterialTheme.typography.bodyMedium)
-                Text("Start Date: ${packageData.pkgStartDate}", style = MaterialTheme.typography.bodySmall)
+                Text(packageData.pkgname, style = MaterialTheme.typography.headlineSmall)
+                Text("Price: $${packageData.pkgbaseprice}")
+                Text("Start: ${packageData.pkgstartdate.substring(0, 10)}")
             }
         }
     }

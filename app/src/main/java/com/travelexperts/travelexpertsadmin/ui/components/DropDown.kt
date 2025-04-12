@@ -19,6 +19,7 @@ fun DropdownMenuComponent(
     label: String,
     items: List<String>,
     selectedItem: String,
+    enabled: Boolean,
     onItemSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -28,6 +29,7 @@ fun DropdownMenuComponent(
             value = selectedItem,
             onValueChange = {},
             readOnly = true,
+            enabled = enabled,
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
@@ -35,20 +37,21 @@ fun DropdownMenuComponent(
                     onClick = { expanded = true },
                     icon = Icons.Default.ArrowDropDown,
                     contentDescription = "Drop-down icon",
-//                    modifier = TODO()
                 )
             }
         )
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item) },
-                    onClick = {
-                        onItemSelected(item)
-                        expanded = false
-                    }
-                )
+                if(enabled) {
+                    DropdownMenuItem(
+                        text = { Text(item) },
+                        onClick = {
+                            onItemSelected(item)
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }

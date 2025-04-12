@@ -28,6 +28,7 @@ import com.travelexperts.travelexpertsadmin.ui.components.CustomCardView
 import com.travelexperts.travelexpertsadmin.ui.components.ProfileField
 import com.travelexperts.travelexpertsadmin.ui.components.StatusBadge
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -44,124 +45,213 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.travelexperts.travelexpertsadmin.data.api.response.Agency
+import com.travelexperts.travelexpertsadmin.data.api.response.Agent
+import com.travelexperts.travelexpertsadmin.ui.components.DropdownMenuComponent
 import com.travelexperts.travelexpertsadmin.ui.components.ProfileField
 import com.travelexperts.travelexpertsadmin.ui.components.StatusBadge
 import com.travelexperts.travelexpertsadmin.ui.theme.Primary
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.utils.resolveImageUrl
+import com.travelexperts.travelexpertsadmin.viewmodels.AgencyViewModel
+import com.travelexperts.travelexpertsadmin.viewmodels.AgentViewModel
+import java.io.File
 
 @Composable
-fun ProfileScreen(navController: NavController) {
-    var isEditMode by remember { mutableStateOf(false) }
-    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: AgentViewModel = hiltViewModel(),
 
+) {
+    val agentId: Int = 28
     val context = LocalContext.current
+    val agentState by viewModel.agentDetail.collectAsState()
+    val updateState by viewModel.updateResult.collectAsState()
+    val agencyViewModel: AgencyViewModel = hiltViewModel()
+    val agencyState by agencyViewModel.agencies.collectAsState()
+    val agencies = when (agencyState) {
+        is NetworkResult.Success -> (agencyState as NetworkResult.Success<List<Agency>>).data
+        else -> emptyList()
+    }
 
-    // Gallery Picker
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri -> if (uri != null) profileImageUri = uri }
-    )
+    var isEditMode by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Camera Capture
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview(),
-        onResult = { bitmap ->
-            // Convert Bitmap to Uri if needed (requires extra logic)
-        }
-    )
-
-    // Sample Profile Data
-    var profile by remember { mutableStateOf(
-        ProfileData(
-            profileImage = R.drawable.woman,
-            firstName = "John",
-            lastName = "Doe",
-            phoneNumber = "123-456-7890",
-            email = "johndoe@example.com",
-            position = "Manager",
-            agency = "Agency A",
-            status = "Active"
+    val imageFile = remember { File(context.cacheDir, "profile.jpg") }
+    val imageUri = remember {
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            imageFile
         )
-    )}
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Profile Image with Camera Icon
-        Box(
-            contentAlignment = Alignment.BottomEnd,
-            modifier = Modifier.size(120.dp)
-        ) {
-            if (profileImageUri != null) {
-                AsyncImage(
-                    model = profileImageUri,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = profile.profileImage),
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                )
-            }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+        }
+    }
 
-            if (isEditMode) {
-                IconButton(
-                    onClick = { galleryLauncher.launch("image/*") },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_linked_camera),
-                        contentDescription = "Edit Profile Picture",
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            selectedImageUri = imageUri
+        }
+    }
+
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchAgentById(agentId)
+    }
+
+    LaunchedEffect(updateState) {
+        when (updateState) {
+            is NetworkResult.Success -> Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
+            is NetworkResult.Failure -> Toast.makeText(context, "Error: ${(updateState as NetworkResult.Failure).message}", Toast.LENGTH_SHORT).show()
+            else -> Unit
+        }
+    }
+
+    when (agentState) {
+        is NetworkResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+
+        is NetworkResult.Success -> {
+            val agent = (agentState as NetworkResult.Success<Agent>).data
+            var localAgent by remember { mutableStateOf(agent) }
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    AsyncImage(
+                        model = selectedImageUri ?: resolveImageUrl(agent.profileImageUrl),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                        contentScale = ContentScale.Crop
                     )
+
+                    if (isEditMode) {
+                        IconButton(
+                            onClick = { galleryLauncher.launch("image/*") },
+                            modifier = Modifier
+                                .offset(x = (-8).dp, y = (-8).dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit Image", tint = Color.White)
+                        }
+                    }
+                }
+                if (isEditMode) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        TextButton(onClick = { galleryLauncher.launch("image/*") }) {
+                            Text("Gallery")
+                        }
+                        TextButton(onClick = { cameraLauncher.launch(imageUri) }) {
+                            Text("Camera")
+                        }
+                    }
+                }
+                // Status Badge
+                StatusBadge(status = agent.status ?: "pending")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                Spacer(Modifier.height(16.dp))
+
+                ProfileField(
+                    value = localAgent.agtfirstname,
+                    onValueChange = { localAgent = localAgent.copy(agtfirstname = it) },
+                    label = "First Name",
+                    isEditMode = isEditMode,
+                )
+
+                ProfileField(
+                    value = localAgent.agtmiddleinitial ?: "",
+                    onValueChange = { localAgent = localAgent.copy(agtmiddleinitial = it) },
+                    label = "Middle Initial",
+                    isEditMode = isEditMode,
+                )
+
+                ProfileField(
+                    value = localAgent.agtlastname,
+                    onValueChange = { localAgent = localAgent.copy(agtlastname = it) },
+                    label = "Last Name",
+                    isEditMode = isEditMode,
+                )
+
+                ProfileField(
+                    value = localAgent.agtbusphone,
+                    onValueChange = { localAgent = localAgent.copy(agtbusphone = it) },
+                    label = "Phone Number",
+                    isEditMode = isEditMode,
+                )
+
+                ProfileField(
+                    value = localAgent.agtemail,
+                    onValueChange = {},
+                    label = "Email",
+                    isEditMode = false,
+                )
+
+                ProfileField(
+                    value = localAgent.agtposition,
+                    onValueChange = { localAgent = localAgent.copy(agtposition = it) },
+                    label = "Position",
+                    isEditMode = isEditMode,
+                )
+
+                val agencyOptions = agencies.map { "${it.agncycity}, ${it.agncyprov}" }
+
+                DropdownMenuComponent(
+                    label = "Agency",
+                    items = agencyOptions,
+                    selectedItem = "${localAgent.agencyid.agncycity}, ${localAgent.agencyid.agncyprov}",
+                    enabled = isEditMode,
+                    onItemSelected = { selected ->
+                        val selectedAgency = agencies.find { "${it.agncycity}, ${it.agncyprov}" == selected }
+                        selectedAgency?.let {
+                            localAgent = localAgent.copy(agencyid = it)
+                        }
+                    }
+                )
+
+                ProfileField("Status", localAgent.status ?: "pending", isEditMode = false)
+
+                Spacer(Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        if (isEditMode) {
+                            viewModel.updateAgent(agentId,localAgent, selectedImageUri, context.contentResolver)
+                        }
+                        isEditMode = !isEditMode
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (isEditMode) "Save Changes" else "Edit Profile")
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Name
-        Text("${profile.firstName} ${profile.lastName}", fontSize = 24.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-
-        // Status Badge
-        StatusBadge(status = profile.status)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Profile Fields
-        ProfileField("Phone Number", profile.phoneNumber, isEditMode, onValueChange = { profile = profile.copy(phoneNumber = it) })
-        ProfileField("Email", profile.email, isEditMode, onValueChange = { profile = profile.copy(email = it) })
-        ProfileField("Position", profile.position, isEditMode, onValueChange = { profile = profile.copy(position = it) })
-        ProfileField("Agency", profile.agency, isEditMode, onValueChange = { profile = profile.copy(agency = it) })
-
-        // Status (Not Editable)
-        ProfileField("Status", profile.status, isEditMode = false)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Toggle Edit Button
-        Button(
-            onClick = { isEditMode = !isEditMode },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Primary )// Only changes background, keeps other defaults
-        ) {
-            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(if (isEditMode) "Save Changes" else "Edit Profile")
+        is NetworkResult.Failure -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = (agentState as NetworkResult.Failure).message, color = Color.Red)
         }
+
+        null -> {}
     }
 }

@@ -1,19 +1,52 @@
 package com.travelexperts.travelexpertsadmin.data.api
 
+import com.travelexperts.travelexpertsadmin.data.api.response.Agency
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.data.api.response.Booking
 import com.travelexperts.travelexpertsadmin.data.api.response.Customer
+import com.travelexperts.travelexpertsadmin.data.api.response.PackageData
 import com.travelexperts.travelexpertsadmin.data.api.response.Product
 import com.travelexperts.travelexpertsadmin.data.api.response.Supplier
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface ApiService {
     @GET("api/agents")
     suspend fun getAgents(): Response<List<Agent>>
+
+    @Multipart
+    @POST("api/agents")
+    suspend fun registerAgent(
+        @Part("agent") agentJson: RequestBody, // JSON stringified RegisterAgentRequest
+        @Part image: MultipartBody.Part?
+    ): Response<Any>
+
+    @GET("api/agents/{id}")
+    suspend fun getAgent(@Path("id") id: Int): Response<Agent>
+
+    @Multipart
+    @PUT("api/agents/{id}")
+    suspend fun updateAgent(
+        @Path("id") id: Int,
+        @Part("agent") agent: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): Response<Agent>
+
+    @GET("api/agencies/{id}")
+    suspend fun getAgencyById(@Path("id") id: Int): Response<Agency>
+
+    @GET("api/agencies")
+    suspend fun getAgencies(): Response<List<Agency>>
+
+
 
     @GET("api/supplier/list")
     suspend fun getSuppliers(): Response<List<Supplier>>
@@ -53,6 +86,27 @@ interface ApiService {
 
     @GET("api/booking/{bookingNo}")
     suspend fun getBookingById(@Path("bookingNo") bookingNo: String): Response<Booking>
+
+    @GET("api/package")
+    suspend fun getAllPackages(): Response<List<PackageData>>
+
+    @GET("api/package/{id}")
+    suspend fun getPackageById(@Path("id") id: Int): Response<PackageData>
+
+    @PUT("api/package/{id}")
+    suspend fun updatePackage(
+        @Path("id") id: Int,
+        @Body pkg: PackageData
+    ): Response<PackageData>
+
+    @Multipart
+    @POST("api/package/{id}/image")
+    suspend fun uploadPackageImage(
+        @Path("id") id: Int,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
+
+
 
 
 }

@@ -1,6 +1,8 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,179 +25,163 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.travelexperts.travelexpertsadmin.R
-import com.travelexperts.travelexpertsadmin.data.PackageData
+import com.travelexperts.travelexpertsadmin.data.api.response.PackageData
+import com.travelexperts.travelexpertsadmin.di.BASE_URL
 
-import android.app.DatePickerDialog
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.travelexperts.travelexpertsadmin.ui.components.DatePickerField
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.PackageViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun PackageDetailScreen(navController: NavController, packageId: Int) {
-    var isEditMode by remember { mutableStateOf(false) }
-    var packageImageUri by remember { mutableStateOf<Uri?>(null) }
+fun PackageDetailScreen(
+    navController: NavController,
+    packageId: Int,
+    viewModel: PackageViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
+    val detailState by viewModel.selectedPackage.collectAsState()
+    val updateState by viewModel.updateState.collectAsState()
+    var isEditMode by remember { mutableStateOf(false) }
 
-    // Date Formatter
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Image Picker
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri -> if (uri != null) packageImageUri = uri }
-    )
-
-    // Sample Package Data (Replace with API Call)
-    var packageData by remember {
-        mutableStateOf(
-            PackageData(
-                packageId, "Beach Getaway", "2025-06-10", "2025-06-20",
-                "Enjoy a tropical getaway with all-inclusive services.",
-                2000.0, 300.0,
-                "https://firebasestorage.googleapis.com/v0/b/cita-e1639.appspot.com/o/uploads%2F1599745875218.jpg?alt=media&token=57624349-bd26-4cbe-9ed7-30076c8c920e",
-                "info@beachresort.com"
-            )
-        )
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            imageUri = it // set local uri for instant preview
+            viewModel.uploadImage(packageId, it, context.contentResolver)
+        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Top
-    ) {
-        // 📌 Package Image with Edit Icon
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            AsyncImage(
-                model = packageImageUri ?: packageData.imagePath,
-                contentDescription = "Package Image",
-                placeholder = painterResource(id = R.drawable.onboarding),
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
 
-            if (isEditMode) {
-                IconButton(
-                    onClick = { galleryLauncher.launch("image/*") },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.BottomEnd)
-                        .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(20.dp))
+    LaunchedEffect(Unit) {
+        viewModel.fetchPackageById(packageId)
+    }
+
+    LaunchedEffect(updateState) {
+        when (updateState) {
+            is NetworkResult.Success -> Toast.makeText(context, "Package Updated", Toast.LENGTH_SHORT).show()
+            is NetworkResult.Failure -> Toast.makeText(context, "Error updating", Toast.LENGTH_SHORT).show()
+            else -> Unit
+        }
+    }
+
+    when (detailState) {
+        is NetworkResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+
+        is NetworkResult.Success -> {
+            val pkg = (detailState as NetworkResult.Success<PackageData>).data
+            var localPkg by remember { mutableStateOf(pkg) }
+
+            Column(Modifier
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())) {
+
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    val displayedImage = imageUri?.toString()
+                        ?: localPkg.imageUrl?.let { if (it.startsWith("/")) "${BASE_URL.dropLast(1)}$it" else it }
+
+
+
+                    AsyncImage(
+                        model = displayedImage ?: R.drawable.default_package,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                    if (isEditMode) {
+                        IconButton(onClick = { galleryLauncher.launch("image/*") }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Change Image", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = localPkg.pkgname,
+                    onValueChange = { localPkg = localPkg.copy(pkgname = it) },
+                    label = { Text("Package Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isEditMode
+                )
+
+                OutlinedTextField(
+                    value = localPkg.pkgdesc ?: "",
+                    onValueChange = { localPkg = localPkg.copy(pkgdesc = it) },
+                    label = { Text("Description") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isEditMode
+                )
+
+                OutlinedTextField(
+                    value = localPkg.pkgbaseprice.toString(),
+                    onValueChange = { localPkg = localPkg.copy(pkgbaseprice = it.toDoubleOrNull() ?: 0.0) },
+                    label = { Text("Base Price") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isEditMode
+                )
+
+                OutlinedTextField(
+                    value = localPkg.pkgagencycommission.toString(),
+                    onValueChange = { localPkg = localPkg.copy(pkgagencycommission = it.toDoubleOrNull() ?: 0.0) },
+                    label = { Text("Agency Commission") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isEditMode
+                )
+
+                DatePickerField(
+                    label = "Start Date",
+                    date = localPkg.pkgstartdate.substring(0, 10),
+                    isEnabled = isEditMode
+                ) { selected ->
+                    localPkg = localPkg.copy(pkgstartdate = selected)
+                }
+
+                DatePickerField(
+                    label = "End Date",
+                    date = localPkg.pkgenddate.substring(0, 10),
+                    isEnabled = isEditMode
+                ) { selected ->
+                    localPkg = localPkg.copy(pkgenddate = selected)
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        if (isEditMode) viewModel.updatePackage(localPkg)
+                        isEditMode = !isEditMode
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit Image", tint = Color.White)
+                    Text(if (isEditMode) "Save Changes" else "Edit")
+                }
+
+                if (!localPkg.reviews.isNullOrEmpty()) {
+                    Spacer(Modifier.height(16.dp))
+                    Text("Reviews:", style = MaterialTheme.typography.titleMedium)
+                    localPkg.reviews.forEach {
+                        Text("- $it", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 📌 Package Name
-        OutlinedTextField(
-            value = packageData.pkgName,
-            onValueChange = { packageData = packageData.copy(pkgName = it) },
-            label = { Text("Package Name") },
-            enabled = isEditMode,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package Description
-        OutlinedTextField(
-            value = packageData.pkgDesc,
-            onValueChange = { packageData = packageData.copy(pkgDesc = it) },
-            label = { Text("Description") },
-            enabled = isEditMode,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package Base Price
-        OutlinedTextField(
-            value = packageData.pkgBasePrice.toString(),
-            onValueChange = { packageData = packageData.copy(pkgBasePrice = it.toDoubleOrNull() ?: 0.0) },
-            label = { Text("Base Price") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            enabled = isEditMode,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package Agency Commission
-        OutlinedTextField(
-            value = packageData.pkgAgencyCommission.toString(),
-            onValueChange = { packageData = packageData.copy(pkgAgencyCommission = it.toDoubleOrNull() ?: 0.0) },
-            label = { Text("Agency Commission") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            enabled = isEditMode,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package Email
-        OutlinedTextField(
-            value = packageData.email,
-            onValueChange = { packageData = packageData.copy(email = it) },
-            label = { Text("Email") },
-            enabled = isEditMode,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package Start Date Picker
-        DatePickerField(
-            label = "Start Date",
-            date = packageData.pkgStartDate,
-            isEnabled = isEditMode
-        ) { selectedDate ->
-            packageData = packageData.copy(pkgStartDate = selectedDate)
+        is NetworkResult.Failure -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = (detailState as NetworkResult.Failure).message, color = Color.Red)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 📌 Package End Date Picker
-        DatePickerField(
-            label = "End Date",
-            date = packageData.pkgEndDate,
-            isEnabled = isEditMode
-        ) { selectedDate ->
-            packageData = packageData.copy(pkgEndDate = selectedDate)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //  Toggle Edit Mode
-        Button(
-            onClick = { isEditMode = !isEditMode },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (isEditMode) "Save Changes" else "Edit Package")
+        null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
     }
 }
