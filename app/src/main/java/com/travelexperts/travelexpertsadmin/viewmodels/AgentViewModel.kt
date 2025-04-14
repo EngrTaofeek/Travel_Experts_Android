@@ -1,10 +1,14 @@
 package com.travelexperts.travelexpertsadmin.viewmodels
 
+import android.app.Application
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.travelexperts.travelexpertsadmin.data.api.repositories.AgentRepository
+import com.travelexperts.travelexpertsadmin.data.api.repositories.AuthRepository
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,8 +19,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AgentViewModel @Inject constructor(
-    private val repository: AgentRepository
-) : ViewModel() {
+    private val repository: AgentRepository,
+    private val authRepository: AuthRepository,
+    private val app: Application
+) : AndroidViewModel(app){
 
     private val _agentState = MutableStateFlow<NetworkResult<List<Agent>>>(NetworkResult.Loading)
     val agentState: StateFlow<NetworkResult<List<Agent>>> = _agentState
@@ -42,6 +48,7 @@ class AgentViewModel @Inject constructor(
         viewModelScope.launch {
             _updateResult.value = NetworkResult.Loading
             _updateResult.value = repository.updateAgent(id, agent, imageUri, resolver)
+            authRepository.fetchAgentProfileByEmail(agent.agtemail, app)
         }
     }
 

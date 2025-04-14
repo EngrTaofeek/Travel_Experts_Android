@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.travelexperts.travelexpertsadmin.data.api.response.Agency
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
+import com.travelexperts.travelexpertsadmin.datastore.UserPreferences
 import com.travelexperts.travelexpertsadmin.ui.components.DropdownMenuComponent
 import com.travelexperts.travelexpertsadmin.ui.components.ProfileField
 import com.travelexperts.travelexpertsadmin.ui.components.StatusBadge
@@ -66,7 +67,6 @@ fun ProfileScreen(
     viewModel: AgentViewModel = hiltViewModel(),
 
 ) {
-    val agentId: Int = 28
     val context = LocalContext.current
     val agentState by viewModel.agentDetail.collectAsState()
     val updateState by viewModel.updateResult.collectAsState()
@@ -76,6 +76,14 @@ fun ProfileScreen(
         is NetworkResult.Success -> (agencyState as NetworkResult.Success<List<Agency>>).data
         else -> emptyList()
     }
+    val userIdString by UserPreferences.getUserId(context).collectAsState(initial = null)
+
+    LaunchedEffect(userIdString) {
+        userIdString?.toIntOrNull()?.let { id ->
+            viewModel.fetchAgentById(id)
+        }
+    }
+
 
     var isEditMode by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -105,10 +113,6 @@ fun ProfileScreen(
         }
     }
 
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchAgentById(agentId)
-    }
 
     LaunchedEffect(updateState) {
         when (updateState) {
@@ -237,7 +241,10 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         if (isEditMode) {
-                            viewModel.updateAgent(agentId,localAgent, selectedImageUri, context.contentResolver)
+                            userIdString?.toIntOrNull()?.let { id ->
+
+                                viewModel.updateAgent(id,localAgent, selectedImageUri, context.contentResolver)
+                            }
                         }
                         isEditMode = !isEditMode
                     },

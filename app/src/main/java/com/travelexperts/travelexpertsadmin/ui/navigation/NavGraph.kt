@@ -25,7 +25,7 @@ import com.travelexperts.travelexpertsadmin.ui.screens.SuppliersScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.TouristAttractionsScreen
 
 @Composable
-fun NavGraph(navController: NavHostController, modifier: Modifier) {
+fun NavGraph(navController: NavHostController, modifier: Modifier, startDestination: String) {
     NavHost(
         navController = navController,
         startDestination = Routes.ONBOARDING,

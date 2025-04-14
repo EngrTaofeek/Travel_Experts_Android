@@ -4,6 +4,7 @@ import com.travelexperts.travelexpertsadmin.data.api.response.Agency
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.data.api.response.Booking
 import com.travelexperts.travelexpertsadmin.data.api.response.Customer
+import com.travelexperts.travelexpertsadmin.data.api.response.LoginResponse
 import com.travelexperts.travelexpertsadmin.data.api.response.PackageData
 import com.travelexperts.travelexpertsadmin.data.api.response.Product
 import com.travelexperts.travelexpertsadmin.data.api.response.Supplier
@@ -11,12 +12,15 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @GET("api/agents")
@@ -31,6 +35,22 @@ interface ApiService {
 
     @GET("api/agents/{id}")
     suspend fun getAgent(@Path("id") id: Int): Response<Agent>
+
+    @FormUrlEncoded
+    @POST("api/user/login")
+    suspend fun loginUser(
+        @Field("email") email: String,
+        @Field("password") password: String
+    ): Response<LoginResponse>
+
+
+    @GET("api/agents/email")
+    suspend fun getAgentByEmail(
+        @Query("email") email: String
+    ): Response<Agent>
+
+
+
 
     @Multipart
     @PUT("api/agents/{id}")
