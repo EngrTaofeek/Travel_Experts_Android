@@ -2,12 +2,11 @@ package com.travelexperts.travelexpertsadmin.ui.components
 
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +28,8 @@ fun ProfileAppBar(
     userName: String,
     subtitle: String,
     backgroundImage: Painter,
-    onNotificationClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -58,6 +58,8 @@ fun ProfileAppBar(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(CircleShape)
+                    .clickable{ onProfileClick()}
+
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -71,11 +73,10 @@ fun ProfileAppBar(
             Spacer(modifier = Modifier.weight(1f))
 
             // Notification Icon
-            IconButton(onClick = onNotificationClick) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.White
+            IconButton(onClick = onLogoutClick) {
+                Image(
+                    painter = painterResource(R.drawable.logout),
+                    contentDescription = "Logout",
                 )
             }
         }

@@ -56,6 +56,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.maps.android:maps-compose:2.11.2")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
+
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.hilt.android)
