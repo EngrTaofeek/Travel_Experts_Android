@@ -1,5 +1,8 @@
 package com.travelexperts.travelexpertsadmin.data.api
 
+import com.travelexperts.travelexpertsadmin.data.ChatInteractionDTO
+import com.travelexperts.travelexpertsadmin.data.ChatMessage
+import com.travelexperts.travelexpertsadmin.data.ChatableUserDTO
 import com.travelexperts.travelexpertsadmin.data.api.response.Agency
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.data.api.response.Booking
@@ -37,11 +40,21 @@ interface ApiService {
     suspend fun getAgent(@Path("id") id: Int): Response<Agent>
 
     @FormUrlEncoded
-    @POST("api/user/login")
+    @POST("api/user/login-agent")
     suspend fun loginUser(
         @Field("email") email: String,
         @Field("password") password: String
     ): Response<LoginResponse>
+
+    @GET("api/chat/interactions")
+    suspend fun getInteractions(@Query("userId") userId: String): Response<List<ChatInteractionDTO>>
+
+    @GET("api/chat/contacts")
+    suspend fun getContacts(@Query("userId") userId: Int, @Query("role") role: String): Response<List<ChatableUserDTO>>
+
+    @GET("api/chat/history/{user1}/{user2}")
+    suspend fun getChatHistory(@Path("user1") user1: String, @Path("user2") user2: String): Response<List<ChatMessage>>
+
 
 
     @GET("api/agents/email")

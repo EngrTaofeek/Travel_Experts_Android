@@ -1,16 +1,24 @@
 package com.travelexperts.travelexpertsadmin.data
 
-data class ChatCustomer(
-    val id: Int,
-    val name: String,
-    val lastMessage: String,
-    val lastTimestamp: String
+data class ChatMessage(
+    val id: Long? = null,
+    val senderId: String,
+    val recipientId: String,
+    val content: String,
+    val timestamp: String? = null
 )
 
-data class ChatMessage(
-    val id: Int,
-    val senderId: Int,
-    val message: String,
-    val timestamp: String,
-    val isFromMe: Boolean
+data class ChatInteractionDTO(
+    val otherUserId: String,
+    val name: String,
+    val profilePicture: String?,
+    val lastMessage: String,
+    val isUserTheLastSender: Boolean
 )
+
+data class ChatableUserDTO(
+    val userEmail: String,
+    val name: String,
+    val profilePicture: String?
+)
+

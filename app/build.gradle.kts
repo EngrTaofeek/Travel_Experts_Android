@@ -57,6 +57,17 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.maps.android:maps-compose:2.11.2")
     implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation ("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.android.libraries.places:places:3.3.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
+
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+
+
 
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -88,8 +99,11 @@ kapt {
     correctErrorTypes = true
 }
 
-//configurations.all {
-//    resolutionStrategy {
-//        force(libs.javapoet) // Use the alias
-//    }
-//}
+configurations.all {
+    resolutionStrategy {
+        // Use the alias
+
+        force ("androidx.appcompat:appcompat:1.4.2")
+        force ( "androidx.appcompat:appcompat-resources:1.4.2")
+    }
+}
