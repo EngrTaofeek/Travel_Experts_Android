@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
                 currentRoute == Routes.REVIEW_AGENTS -> "Review Agents"
                 currentRoute == Routes.PROFILE -> "Profile"
                 currentRoute == Routes.TOURIST_ACTIONS -> "Tourist Attractions"
+                currentRoute == Routes.NEW_CHAT -> "New Chat"
                 else -> "Header"
             }
 

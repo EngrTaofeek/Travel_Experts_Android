@@ -22,6 +22,7 @@ object Routes {
 
     const val MESSAGES = "messages"
     const val CHAT = "chat"
+    const val NEW_CHAT = "new_chat"
     const val REVIEW_AGENTS = "review-agents"
     const val TOURIST_ACTIONS = "tourist-actions"
 }

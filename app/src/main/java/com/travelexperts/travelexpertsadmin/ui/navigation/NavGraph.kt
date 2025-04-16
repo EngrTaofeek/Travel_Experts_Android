@@ -21,6 +21,7 @@ import com.travelexperts.travelexpertsadmin.ui.screens.PendingAgentsScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.ProductsScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.ProfileScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.RegisterScreen
+import com.travelexperts.travelexpertsadmin.ui.screens.StartNewChatScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.SuppliersScreen
 import com.travelexperts.travelexpertsadmin.ui.screens.TouristAttractionsScreen
 
@@ -67,9 +68,14 @@ fun NavGraph(navController: NavHostController, modifier: Modifier, startDestinat
         composable(Routes.REVIEW_AGENTS) { PendingAgentsScreen(navController) }
         composable(Routes.TOURIST_ACTIONS) { TouristAttractionsScreen(navController) }
 
-        composable("${Routes.CHAT}/{customerId}") { backStackEntry ->
-            val customerId = backStackEntry.arguments?.getString("customerId")?.toInt() ?: 0
-            ChatScreen(customerId, navController)
+        composable("${Routes.CHAT}/{currentUserEmail}/{otherUserEmail}") { backStackEntry ->
+            val currentUserEmail = backStackEntry.arguments?.getString("currentUserEmail") ?: ""
+            val otherUserEmail = backStackEntry.arguments?.getString("otherUserEmail") ?: ""
+            ChatScreen(currentUserEmail,otherUserEmail, navController)
+        }
+        composable("${Routes.NEW_CHAT}/{currentUserEmail}") { backStackEntry ->
+            val currentUserEmail = backStackEntry.arguments?.getString("currentUserEmail") ?: ""
+            StartNewChatScreen(currentUserEmail, navController)
         }
     }
 }

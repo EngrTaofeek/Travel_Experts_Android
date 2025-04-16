@@ -1,5 +1,6 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -70,7 +71,9 @@ fun PackagesList(packages: List<PackageData>, navController: NavController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
         items(packages) { pkg ->
+            Log.i("PackagesList", "${BASE_URL.dropLast(1)}${pkg.imageUrl}")
             PackageCard(pkg) {
                 navController.navigate("packageDetail/${pkg.id}")
             }

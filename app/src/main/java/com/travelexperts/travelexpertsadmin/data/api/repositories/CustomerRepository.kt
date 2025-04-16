@@ -9,8 +9,8 @@ import javax.inject.Inject
 class CustomerRepository @Inject constructor(
     private val apiService: ApiService
 ) {
-    suspend fun getCustomers(): NetworkResult<List<Customer>> = try {
-        val response = apiService.getAllCustomers()
+    suspend fun getCustomers(agentId: Int): NetworkResult<List<Customer>> = try {
+        val response = apiService.getAllCustomers(agentId)
         if (response.isSuccessful) NetworkResult.Success(response.body() ?: emptyList())
         else NetworkResult.Failure("Error ${response.code()}: ${response.message()}")
     } catch (e: Exception) {

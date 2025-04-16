@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.travelexperts.travelexpertsadmin.data.ChatCustomer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,33 +26,52 @@ import androidx.compose.ui.Alignment
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.travelexperts.travelexpertsadmin.data.ChatMessage
+import com.travelexperts.travelexpertsadmin.utils.NetworkResult
+import com.travelexperts.travelexpertsadmin.viewmodels.ChatViewModel
 
 @Composable
-fun ChatScreen(customerId: Int, navController: NavController) {
-    val messages = remember {
-        mutableStateListOf(
-            ChatMessage(1, customerId, "Hi, how can I help you?", "12:00 PM", false),
-            ChatMessage(2, 0, "I'm checking on my booking.", "12:01 PM", true),
-            ChatMessage(3, customerId, "Sure, I’ll look it up now.", "12:02 PM", false)
-        ).reversed().toMutableStateList()
-    }
-
+fun ChatScreen(
+    currentUserEmail: String,
+    otherUserEmail: String,
+    navController: NavController,
+    viewModel: ChatViewModel = hiltViewModel()
+) {
+    val chatHistory by viewModel.chatHistory.collectAsState()
     var newMessage by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text("Chat with Customer #$customerId")
+    val messages = viewModel.messages
 
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            reverseLayout = true
-        ) {
-            items(messages.size) { index ->
-                ChatBubble(message = messages[index])
-                Spacer(modifier = Modifier.height(8.dp))
+    LaunchedEffect(Unit) {
+        viewModel.fetchChatHistory(currentUserEmail, otherUserEmail)
+        viewModel.initWebSocket(currentUserEmail)
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        Text("Chat with $otherUserEmail", modifier = Modifier.padding(16.dp))
+
+        when (chatHistory) {
+            is NetworkResult.Loading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+            is NetworkResult.Success -> {
+                val messages = (chatHistory as NetworkResult.Success<List<ChatMessage>>).data.reversed()
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp),
+                    reverseLayout = true
+                ) {
+                    items(messages.size) { index ->
+                        ChatBubble(
+                            message = messages[index].content,
+                            isFromMe = messages[index].senderId == currentUserEmail,
+                            timestamp = messages[index].timestamp.toString()
+                        )
+                    }
+                }
             }
+
+            is NetworkResult.Failure -> Text("Failed to load chat")
         }
 
         Row(
@@ -70,18 +88,9 @@ fun ChatScreen(customerId: Int, navController: NavController) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
-                if (newMessage.isNotBlank()) {
-                    messages.add(
-                        ChatMessage(
-                            id = messages.size + 1,
-                            senderId = 0,
-                            message = newMessage,
-                            timestamp = "Now",
-                            isFromMe = true
-                        )
-                    )
-                    newMessage = ""
-                }
+
+                viewModel.sendMessage(ChatMessage(senderId =  currentUserEmail, recipientId =  otherUserEmail, content =  newMessage))
+                newMessage = ""
             }) {
                 Text("Send")
             }
@@ -90,27 +99,25 @@ fun ChatScreen(customerId: Int, navController: NavController) {
 }
 
 @Composable
-fun ChatBubble(message: ChatMessage) {
-    val alignment = if (message.isFromMe) Arrangement.End else Arrangement.Start
-    val bubbleColor = if (message.isFromMe) MaterialTheme.colorScheme.primary else Color(0xFFE0E0E0)
-    val textColor = if (message.isFromMe) Color.White else Color.Black
+fun ChatBubble(message: String, isFromMe: Boolean, timestamp: String) {
+    val alignment = if (isFromMe) Arrangement.End else Arrangement.Start
+    val bubbleColor = if (isFromMe) MaterialTheme.colorScheme.primary else Color(0xFFE0E0E0)
+    val textColor = if (isFromMe) Color.White else Color.Black
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = alignment
     ) {
-        Column(horizontalAlignment = if (message.isFromMe) Alignment.End else Alignment.Start) {
+        Column(horizontalAlignment = if (isFromMe) Alignment.End else Alignment.Start) {
             Box(
                 modifier = Modifier
                     .background(bubbleColor, shape = RoundedCornerShape(12.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Text(text = message.message, color = textColor)
+                Text(text = message, color = textColor)
             }
             Text(
-                text = message.timestamp,
+                text = timestamp,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Gray,
                 modifier = Modifier.padding(4.dp)
