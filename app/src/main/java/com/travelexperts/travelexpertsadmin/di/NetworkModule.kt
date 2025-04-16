@@ -15,7 +15,9 @@ import android.app.Application
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
 //const val BASE_URL = "http://10.187.148.205:8080/" //class wifi
-const val BASE_URL = "http://192.168.1.67:8080/" //Taofeek's house address wifi
+const val BASE_URL = "http://10.0.2.2:8080/" //class wifi
+//const val BASE_URL = "http://192.168.1.67:8080/" //Taofeek's house address wifi
+const val MAPS_API_KEY = "AIzaSyD_XHq1jOa5NcZQ3lIaL98zaVFVB1X1vyo"
 // 4. di/NetworkModule.kt
 
 @Module

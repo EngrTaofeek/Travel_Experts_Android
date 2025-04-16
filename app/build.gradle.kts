@@ -63,6 +63,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
     implementation ("com.google.android.libraries.places:places:3.3.0")
     implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
+
 
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")

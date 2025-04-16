@@ -21,10 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -79,18 +81,28 @@ fun TouristAttractionsScreen(
         )
 
         LazyColumn {
-            items(predictions.size) { prediction ->
+            items(predictions.size) { index ->
+                val predictionText = predictions[index].getFullText(null).toString()
+
                 Text(
-                    text = predictions[prediction].getFullText(null).toString(),
+                    text = predictionText,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            query = predictions[prediction].getFullText(null).toString()
+                            val selectedPrediction = predictions[index]
+                            query = predictionText
                             predictions = emptyList()
+
                             val request = FetchPlaceRequest.newInstance(
-                                predictions[prediction].placeId,
-                                listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
+                                selectedPrediction.placeId,
+                                listOf(
+                                    Place.Field.ID,
+                                    Place.Field.NAME,
+                                    Place.Field.LAT_LNG,
+                                    Place.Field.ADDRESS
+                                )
                             )
+
                             placesClient.fetchPlace(request)
                                 .addOnSuccessListener { result ->
                                     viewModel.onPlaceSelected(result.place)
@@ -107,7 +119,8 @@ fun TouristAttractionsScreen(
             Text("Nearby Tourist Attractions:", style = MaterialTheme.typography.titleMedium)
 
             LazyColumn {
-                items(nearbyPlaces.size) { place ->
+                items(nearbyPlaces.size) { index ->
+                    val place = nearbyPlaces[index]
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -115,13 +128,18 @@ fun TouristAttractionsScreen(
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(nearbyPlaces[place].name ?: "Unknown", style = MaterialTheme.typography.titleMedium)
-                            nearbyPlaces[place].address?.let { Text("📍 $it", style = MaterialTheme.typography.bodySmall) }
-                            nearbyPlaces[place].latLng?.let {
-                                Text("🧭 (${it.latitude}, ${it.longitude})", style = MaterialTheme.typography.bodySmall)
-                            }
-                            nearbyPlaces[place].rating?.let {
-                                Text("⭐ Rating: $it", style = MaterialTheme.typography.bodySmall)
+                            Text(place.name, style = MaterialTheme.typography.titleMedium)
+                            place.address?.let { Text("📍 $it", style = MaterialTheme.typography.bodySmall) }
+                            place.rating?.let { Text("⭐ Rating: $it", style = MaterialTheme.typography.bodySmall) }
+                            place.imageUrl?.let {
+                                AsyncImage(
+                                    model = it,
+                                    contentDescription = place.name,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .padding(top = 8.dp)
+                                )
                             }
                         }
                     }
@@ -132,3 +150,4 @@ fun TouristAttractionsScreen(
         }
     }
 }
+

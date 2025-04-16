@@ -32,9 +32,6 @@ class CustomerViewModel @Inject constructor(
     private val _updateBookingState = MutableStateFlow<NetworkResult<Booking>?>(null)
     val updateBookingState: StateFlow<NetworkResult<Booking>?> = _updateBookingState
 
-    init {
-        fetchCustomers()
-    }
     private val _selectedBooking = MutableStateFlow<NetworkResult<Booking>?>(null)
     val selectedBooking: StateFlow<NetworkResult<Booking>?> = _selectedBooking
 
@@ -43,9 +40,9 @@ class CustomerViewModel @Inject constructor(
         _selectedBooking.value = repository.getBooking(bookingNo)
     }
 
-    fun fetchCustomers() = viewModelScope.launch {
+    fun fetchCustomers(agentId: Int) = viewModelScope.launch {
         _customers.value = NetworkResult.Loading
-        _customers.value = repository.getCustomers()
+        _customers.value = repository.getCustomers(agentId)
     }
 
     fun fetchCustomer(id: Int) = viewModelScope.launch {

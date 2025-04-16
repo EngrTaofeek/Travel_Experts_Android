@@ -96,8 +96,8 @@ interface ApiService {
     @PUT("api/product/{id}")
     suspend fun updateProduct(@Path("id") id: Int, @Body product: Product): Response<Product>
 
-    @GET("api/customer")
-    suspend fun getAllCustomers(): Response<List<Customer>>
+    @GET("api/customer/by-agent/{id}")
+    suspend fun getAllCustomers(@Path("id") id: Int): Response<List<Customer>>
 
     @GET("api/customer/{id}")
     suspend fun getCustomer(@Path("id") id: Int): Response<Customer>

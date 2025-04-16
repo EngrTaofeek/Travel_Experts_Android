@@ -74,7 +74,12 @@ class AuthenticationViewModel @Inject constructor(
 
         viewModelScope.launch {
             _registerState.value = NetworkResult.Loading
-            _registerState.value = repository.registerAgent(request, imageUri, contentResolver)
+            val result = repository.registerAgent(request, imageUri, contentResolver)
+
+            if (result is NetworkResult.Success) {
+                login(email, password)
+            }
+            _registerState.value = result
         }
     }
 

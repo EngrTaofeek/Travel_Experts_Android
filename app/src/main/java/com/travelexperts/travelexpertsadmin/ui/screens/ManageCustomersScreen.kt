@@ -11,10 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.travelexperts.travelexpertsadmin.data.api.response.Customer
+import com.travelexperts.travelexpertsadmin.datastore.UserPreferences
 import com.travelexperts.travelexpertsadmin.ui.components.CustomerCard
 import com.travelexperts.travelexpertsadmin.utils.NetworkResult
 import com.travelexperts.travelexpertsadmin.viewmodels.CustomerViewModel
@@ -22,6 +24,14 @@ import com.travelexperts.travelexpertsadmin.viewmodels.CustomerViewModel
 @Composable
 fun ManageCustomersScreen(navController: NavController, viewModel: CustomerViewModel = hiltViewModel()) {
     val customerState by viewModel.customers.collectAsState()
+    val context = LocalContext.current
+    val userIdString by UserPreferences.getUserId(context).collectAsState(initial = null)
+
+    LaunchedEffect(userIdString) {
+        userIdString?.toIntOrNull()?.let { id ->
+            viewModel.fetchCustomers(id)
+        }
+    }
 
     when (customerState) {
         is NetworkResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -11,8 +11,9 @@ import javax.inject.Singleton
 
 @Singleton
 class WebSocketManager @Inject constructor() {
-//    val wsUrl = "ws://10.187.148.205:8080/" //class wifi
-    val wsUrl = "ws://192.168.1.67:8080/" //Taofeek house wifi
+    val wsUrl = "ws://10.0.2.2:8080/" //class wifi
+// val wsUrl = "ws://10.187.148.205:8080/" //emulator
+//    val wsUrl = "ws://192.168.1.67:8080/" //Taofeek house wifi
     private val client = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "${wsUrl}chat/websocket")
     private var isConnected = false
 
