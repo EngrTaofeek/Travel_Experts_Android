@@ -206,7 +206,7 @@ fun RegisterScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CustomLoader()
+                        CircularProgressIndicator()
                     }
                 }
                 OutlinedTextField(

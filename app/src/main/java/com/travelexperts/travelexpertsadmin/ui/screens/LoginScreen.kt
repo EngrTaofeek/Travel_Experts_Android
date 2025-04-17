@@ -111,7 +111,7 @@ fun LoginScreen(
                 onToggleVisibility = { isPasswordVisible = !isPasswordVisible }
             )
             if (loginState is NetworkResult.Loading) {
-                CustomLoader()
+                CircularProgressIndicator()
             }
             Spacer(Modifier.height(24.dp))
 
