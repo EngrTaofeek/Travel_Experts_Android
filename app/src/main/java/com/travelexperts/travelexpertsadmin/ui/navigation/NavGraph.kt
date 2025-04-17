@@ -68,10 +68,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier, startDestinat
         composable(Routes.REVIEW_AGENTS) { PendingAgentsScreen(navController) }
         composable(Routes.TOURIST_ACTIONS) { TouristAttractionsScreen(navController) }
 
-        composable("${Routes.CHAT}/{currentUserEmail}/{otherUserEmail}") { backStackEntry ->
+        composable("${Routes.CHAT}/{currentUserEmail}/{otherUserEmail}/{otherUserFullName}") { backStackEntry ->
             val currentUserEmail = backStackEntry.arguments?.getString("currentUserEmail") ?: ""
             val otherUserEmail = backStackEntry.arguments?.getString("otherUserEmail") ?: ""
-            ChatScreen(currentUserEmail,otherUserEmail, navController)
+            val otherUserFullName = backStackEntry.arguments?.getString("otherUserFullName") ?: ""
+            ChatScreen(currentUserEmail,otherUserEmail,otherUserFullName, navController)
         }
         composable("${Routes.NEW_CHAT}/{currentUserEmail}") { backStackEntry ->
             val currentUserEmail = backStackEntry.arguments?.getString("currentUserEmail") ?: ""

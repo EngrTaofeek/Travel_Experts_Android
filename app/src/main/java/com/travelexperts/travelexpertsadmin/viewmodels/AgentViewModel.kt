@@ -2,10 +2,8 @@ package com.travelexperts.travelexpertsadmin.viewmodels
 
 import android.app.Application
 import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.travelexperts.travelexpertsadmin.data.api.repositories.AgentRepository
 import com.travelexperts.travelexpertsadmin.data.api.repositories.AuthRepository
@@ -44,11 +42,14 @@ class AgentViewModel @Inject constructor(
         }
     }
 
-    fun updateAgent(id: Int, agent: Agent, imageUri: Uri?, resolver: ContentResolver) {
+    fun updateAgent(id: Int, agent: Agent, imageUri: Uri?, resolver: ContentResolver, isPendingAgent: Boolean = false) {
         viewModelScope.launch {
             _updateResult.value = NetworkResult.Loading
             _updateResult.value = repository.updateAgent(id, agent, imageUri, resolver)
+            if (!isPendingAgent) {
             authRepository.fetchAgentProfileByEmail(agent.agtemail, app)
+            }
+            fetchAgents()
         }
     }
 

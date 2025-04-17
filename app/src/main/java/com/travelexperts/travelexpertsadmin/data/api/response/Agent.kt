@@ -11,7 +11,7 @@ data class Agent(
     val agtemail: String,
     val agtposition: String,
     val agencyid: Agency,
-    val status: String,
+    var status: String,
     val profileImageUrl: String?,
     val role: String
 )

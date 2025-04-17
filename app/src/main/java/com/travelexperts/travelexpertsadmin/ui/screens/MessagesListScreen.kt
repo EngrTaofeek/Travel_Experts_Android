@@ -24,8 +24,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.travelexperts.travelexpertsadmin.R
 import com.travelexperts.travelexpertsadmin.data.ChatInteractionDTO
 import com.travelexperts.travelexpertsadmin.datastore.UserPreferences
 import com.travelexperts.travelexpertsadmin.ui.navigation.Routes
@@ -51,7 +56,6 @@ fun MessagesListScreen(
     }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Chats", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(Modifier.height(16.dp))
 
@@ -77,7 +81,7 @@ fun MessagesListScreen(
                             name = list[index].name,
                             lastMessage = list[index].lastMessage ?: "",
                             onClick = {
-                                navController.navigate("${Routes.CHAT}/${userEmail}/${list[index].otherUserId}")
+                                navController.navigate("${Routes.CHAT}/${userEmail}/${list[index].otherUserId}/${list[index].name}")
                             }
                         )
                     }
@@ -99,15 +103,17 @@ fun ChatCustomerItem(name: String, lastMessage: String, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                    .padding(8.dp)
-            )
+
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        .padding(8.dp)
+                )
+
 
             Spacer(Modifier.width(12.dp))
 

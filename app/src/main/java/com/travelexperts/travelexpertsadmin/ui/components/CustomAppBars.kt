@@ -2,6 +2,7 @@ package com.travelexperts.travelexpertsadmin.ui.components
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -59,6 +60,7 @@ fun ProfileAppBar(
                     .size(50.dp)
                     .clip(CircleShape)
                     .clickable{ onProfileClick()}
+                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
 
             )
 

@@ -52,8 +52,8 @@ fun StartNewChatScreen(
                         ChatCustomerItem(
                             name = list[index].name,
                             lastMessage = list[index].userEmail,
-                            onClick = {
-                                navController.navigate("${Routes.CHAT}/${currentUserEmail}/${list[index].userEmail}")
+                             onClick = {
+                                navController.navigate("${Routes.CHAT}/${currentUserEmail}/${list[index].userEmail}/${list[index].name}")
 
                             }
                         )

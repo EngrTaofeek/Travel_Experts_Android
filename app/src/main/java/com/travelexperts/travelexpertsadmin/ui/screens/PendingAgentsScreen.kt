@@ -12,17 +12,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.ui.components.AgentApprovalItem
 import com.travelexperts.travelexpertsadmin.utils.NetworkResult
 import com.travelexperts.travelexpertsadmin.viewmodels.AgentViewModel
-import kotlin.collections.get
 
 @Composable
 fun PendingAgentsScreen(navController: NavHostController,viewModel: AgentViewModel = hiltViewModel()) {
@@ -35,7 +34,7 @@ fun PendingAgentsScreen(navController: NavHostController,viewModel: AgentViewMod
             }
         }
         is NetworkResult.Success -> {
-            AgentListScreen((agentState as NetworkResult.Success<List<Agent>>).data)
+            AgentListScreen((agentState as NetworkResult.Success<List<Agent>>).data,viewModel)
         }
         is NetworkResult.Failure -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -48,7 +47,8 @@ fun PendingAgentsScreen(navController: NavHostController,viewModel: AgentViewMod
 }
 
 @Composable
-fun AgentListScreen(agents: List<Agent>) {
+fun AgentListScreen(agents: List<Agent>, viewModel: AgentViewModel) {
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
@@ -57,14 +57,21 @@ fun AgentListScreen(agents: List<Agent>) {
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
             items(agents.size) { index ->
                 AgentApprovalItem(
                     agent = agents[index],
                     onApprove = {
-                        //Call viewmodel to update agent
+                       var updatedAgent: Agent  = agents[index]
+                        updatedAgent.status = "approved"
+                        viewModel.updateAgent(agents[index].id, updatedAgent, null, context.contentResolver,true)
+
                     },
                     onReject = {
-                        //Call viewmodel to update agent
+                        var updatedAgent: Agent  = agents[index]
+                        updatedAgent.status = "Rejected"
+                        viewModel.updateAgent(agents[index].id, updatedAgent, null, context.contentResolver,true)
+
                     }
                 )
             }

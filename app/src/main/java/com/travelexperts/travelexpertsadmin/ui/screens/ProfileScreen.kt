@@ -1,50 +1,30 @@
 package com.travelexperts.travelexpertsadmin.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.travelexperts.travelexpertsadmin.R
-import com.travelexperts.travelexpertsadmin.data.ProfileData
-import com.travelexperts.travelexpertsadmin.ui.components.CustomCardView
 import com.travelexperts.travelexpertsadmin.ui.components.ProfileField
 import com.travelexperts.travelexpertsadmin.ui.components.StatusBadge
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -52,9 +32,6 @@ import com.travelexperts.travelexpertsadmin.data.api.response.Agency
 import com.travelexperts.travelexpertsadmin.data.api.response.Agent
 import com.travelexperts.travelexpertsadmin.datastore.UserPreferences
 import com.travelexperts.travelexpertsadmin.ui.components.DropdownMenuComponent
-import com.travelexperts.travelexpertsadmin.ui.components.ProfileField
-import com.travelexperts.travelexpertsadmin.ui.components.StatusBadge
-import com.travelexperts.travelexpertsadmin.ui.theme.Primary
 import com.travelexperts.travelexpertsadmin.utils.NetworkResult
 import com.travelexperts.travelexpertsadmin.utils.resolveImageUrl
 import com.travelexperts.travelexpertsadmin.viewmodels.AgencyViewModel
@@ -138,8 +115,13 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(contentAlignment = Alignment.BottomEnd) {
+                    val imageModel = when {
+                        selectedImageUri != null -> selectedImageUri
+                        !agent.profileImageUrl.isNullOrBlank() -> resolveImageUrl(agent.profileImageUrl)
+                        else -> R.drawable.baseline_person_24 // Fallback image in drawable
+                    }
                     AsyncImage(
-                        model = selectedImageUri ?: resolveImageUrl(agent.profileImageUrl),
+                        model = imageModel,
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .size(120.dp)
@@ -180,42 +162,42 @@ fun ProfileScreen(
                 ProfileField(
                     value = localAgent.agtfirstname,
                     onValueChange = { localAgent = localAgent.copy(agtfirstname = it) },
-                    label = "First Name",
+                    label = "👤 First Name",
                     isEditMode = isEditMode,
                 )
 
                 ProfileField(
                     value = localAgent.agtmiddleinitial ?: "",
                     onValueChange = { localAgent = localAgent.copy(agtmiddleinitial = it) },
-                    label = "Middle Initial",
+                    label = "🔤 Middle Initial",
                     isEditMode = isEditMode,
                 )
 
                 ProfileField(
                     value = localAgent.agtlastname,
                     onValueChange = { localAgent = localAgent.copy(agtlastname = it) },
-                    label = "Last Name",
+                    label = "👥 Last Name",
                     isEditMode = isEditMode,
                 )
 
                 ProfileField(
                     value = localAgent.agtbusphone,
                     onValueChange = { localAgent = localAgent.copy(agtbusphone = it) },
-                    label = "Phone Number",
+                    label =  "📞 Phone Number",
                     isEditMode = isEditMode,
                 )
 
                 ProfileField(
                     value = localAgent.agtemail,
                     onValueChange = {},
-                    label = "Email",
+                    label = "📧 Email",
                     isEditMode = false,
                 )
 
                 ProfileField(
                     value = localAgent.agtposition,
                     onValueChange = { localAgent = localAgent.copy(agtposition = it) },
-                    label = "Position",
+                    label = "💼 Position",
                     isEditMode = isEditMode,
                 )
 
@@ -243,7 +225,13 @@ fun ProfileScreen(
                         if (isEditMode) {
                             userIdString?.toIntOrNull()?.let { id ->
 
-                                viewModel.updateAgent(id,localAgent, selectedImageUri, context.contentResolver)
+                                viewModel.updateAgent(
+                                    id,
+                                    localAgent,
+                                    selectedImageUri,
+                                    context.contentResolver,
+                                    false
+                                )
                             }
                         }
                         isEditMode = !isEditMode

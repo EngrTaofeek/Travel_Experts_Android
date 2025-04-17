@@ -21,7 +21,8 @@ class AgentRepository @Inject constructor(
         return try {
             val response = apiService.getAgents()
             if (response.isSuccessful && response.body() != null) {
-                NetworkResult.Success(response.body()!!)
+                val pendingAgents = response.body()!!.filter { it.status.equals("pending", ignoreCase = true) }
+                NetworkResult.Success(pendingAgents)
             } else {
                 NetworkResult.Failure("Error ${response.code()}: ${response.message()}")
             }
@@ -29,6 +30,7 @@ class AgentRepository @Inject constructor(
             NetworkResult.Failure(e.localizedMessage ?: "Unexpected error occurred")
         }
     }
+
     suspend fun getAgent(id: Int): NetworkResult<Agent> = try {
         val res = apiService.getAgent(id)
         if (res.isSuccessful) NetworkResult.Success(res.body()!!)
