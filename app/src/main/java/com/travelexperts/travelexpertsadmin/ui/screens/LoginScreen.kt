@@ -111,7 +111,7 @@ fun LoginScreen(
                 onToggleVisibility = { isPasswordVisible = !isPasswordVisible }
             )
             if (loginState is NetworkResult.Loading) {
-                CustomLoader()
+                CircularProgressIndicator()
             }
             Spacer(Modifier.height(24.dp))
 
@@ -119,7 +119,7 @@ fun LoginScreen(
                 text = "Login",
                 onClick = {
                     if (email.isNotEmpty() && password.isNotEmpty()) {
-                        viewModel.login(email, password)
+                        viewModel.login(email.lowercase().trim(), password)
                     } else {
                         //replace with snackbar or dialog
                         Toast.makeText(context,"Please enter email and password",Toast.LENGTH_SHORT).show()

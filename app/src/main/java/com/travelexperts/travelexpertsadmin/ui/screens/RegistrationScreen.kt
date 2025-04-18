@@ -124,145 +124,177 @@ fun RegisterScreen(
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(padding)
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
         ) {
-            Text("Register Agent", style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(16.dp))
-
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clickable { galleryLauncher.launch("image/*") },
-                contentAlignment = Alignment.Center
+                    .padding(padding)
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (profilePhotoUri != null) {
-                    AsyncImage(
-                        model = profilePhotoUri,
-                        contentDescription = "Profile Picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(R.drawable.baseline_person_24),
-                        contentDescription = "Placeholder",
-                        modifier = Modifier.fillMaxSize()
-                    )
+                Text("Register Agent", style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clickable { galleryLauncher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (profilePhotoUri != null) {
+                        AsyncImage(
+                            model = profilePhotoUri,
+                            contentDescription = "Profile Picture",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(R.drawable.baseline_person_24),
+                            contentDescription = "Placeholder",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
-            }
-            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = { galleryLauncher.launch("image/*") }) {
-                    Text("Pick from Gallery")
-                }
-                TextButton(onClick = {
-                    val uri = createTempImageUri(context)
-                    tempImageUri = uri
-                    cameraLauncher.launch(uri)
-                }) {
-                    Text("Take Photo")
-                }
-
-            }
-            Spacer(Modifier.height(16.dp))
-
-            // Input Fields
-            OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = middleInitial, onValueChange = { middleInitial = it }, label = { Text("Middle Initial") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") }, modifier = Modifier.fillMaxWidth())
-            if (loginState is NetworkResult.Loading || registerState is NetworkResult.Loading) {
-                CustomLoader()
-            }
-            OutlinedTextField(
-                value = phoneNumber,
-                onValueChange = { if (it.all(Char::isDigit)) phoneNumber = it },
-                label = { Text("Phone Number") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            EmailTextField(email = email, onEmailChange = { email = it })
-
-            DropdownMenuComponent(
-                label = "Position",
-                items = positions,
-                selectedItem = selectedPosition,
-                enabled = true,
-                onItemSelected = { selectedPosition = it }
-            )
-
-            DropdownMenuComponent(
-                label = "Agency",
-                items = agencies.map { "${it.agncycity}, ${it.agncyprov}" },
-                selectedItem = selectedAgencyName,
-                enabled = true,
-                onItemSelected = { name ->
-                    selectedAgencyName = name
-                    selectedAgencyId = agencies.find { "${it.agncycity}, ${it.agncyprov}" == name }?.id ?: 0
-                }
-            )
-
-
-            PasswordTextField(
-                password = password,
-                onPasswordChange = { password = it },
-                isPasswordVisible = isPasswordVisible,
-                onToggleVisibility = { isPasswordVisible = !isPasswordVisible }
-            )
-
-            PasswordTextField(
-                password = confirmPassword,
-                onPasswordChange = { confirmPassword = it },
-                isPasswordVisible = isPasswordVisible,
-                onToggleVisibility = { isPasswordVisible = !isPasswordVisible },
-                label = "Confirm Password"
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            SolidButton(
-                text = "Register",
-                enabled = listOf(
-                    firstName, lastName, phoneNumber, email,
-                    selectedPosition, selectedAgencyId.toString(),
-                    password.trim(), confirmPassword.trim()
-                ).all { it.isNotBlank() } && password == confirmPassword,
-                onClick = {
-                    if (password.trim() != confirmPassword.trim()) {
-                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                        return@SolidButton
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = { galleryLauncher.launch("image/*") }) {
+                        Text("Pick from Gallery")
+                    }
+                    TextButton(onClick = {
+                        val uri = createTempImageUri(context)
+                        tempImageUri = uri
+                        cameraLauncher.launch(uri)
+                    }) {
+                        Text("Take Photo")
                     }
 
-                    viewModel.registerAgent(
-                        firstName = firstName,
-                        middleInitial = middleInitial.ifBlank { null },
-                        lastName = lastName,
-                        phone = phoneNumber,
-                        email = email.trim(),
-                        password = password.trim(),
-                        position = "agent",
-                        agencyId = selectedAgencyId,
-                        imageUri = profilePhotoUri,
-                        contentResolver = context.contentResolver
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+                }
+                Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(12.dp))
+                // Input Fields
+                OutlinedTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    label = { Text("First Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = middleInitial,
+                    onValueChange = { middleInitial = it },
+                    label = { Text("Middle Initial") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    label = { Text("Last Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (loginState is NetworkResult.Loading || registerState is NetworkResult.Loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                OutlinedTextField(
+                    value = phoneNumber,
+                    onValueChange = { if (it.all(Char::isDigit)) phoneNumber = it },
+                    label = { Text("Phone Number") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            OutlineButton(
-                text = "Already have an account? Login",
-                onClick = { navController.navigate("login") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                EmailTextField(email = email, onEmailChange = { email = it })
+
+                DropdownMenuComponent(
+                    label = "Position",
+                    items = positions,
+                    selectedItem = selectedPosition,
+                    enabled = true,
+                    onItemSelected = { selectedPosition = it }
+                )
+
+                DropdownMenuComponent(
+                    label = "Agency",
+                    items = agencies.map { "${it.agncycity}, ${it.agncyprov}" },
+                    selectedItem = selectedAgencyName,
+                    enabled = true,
+                    onItemSelected = { name ->
+                        selectedAgencyName = name
+                        selectedAgencyId =
+                            agencies.find { "${it.agncycity}, ${it.agncyprov}" == name }?.id ?: 0
+                    }
+                )
+
+
+                PasswordTextField(
+                    password = password,
+                    onPasswordChange = { password = it },
+                    isPasswordVisible = isPasswordVisible,
+                    onToggleVisibility = { isPasswordVisible = !isPasswordVisible }
+                )
+
+                PasswordTextField(
+                    password = confirmPassword,
+                    onPasswordChange = { confirmPassword = it },
+                    isPasswordVisible = isPasswordVisible,
+                    onToggleVisibility = { isPasswordVisible = !isPasswordVisible },
+                    label = "Confirm Password"
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                SolidButton(
+                    text = "Register",
+                    enabled = listOf(
+                        firstName, lastName, phoneNumber, email,
+                        selectedPosition, selectedAgencyId.toString(),
+                        password.trim(), confirmPassword.trim()
+                    ).all { it.isNotBlank() } && password == confirmPassword,
+                    onClick = {
+                        if (password.trim() != confirmPassword.trim()) {
+                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT)
+                                .show()
+                            return@SolidButton
+                        }
+
+                        viewModel.registerAgent(
+                            firstName = firstName,
+                            middleInitial = middleInitial.ifBlank { null },
+                            lastName = lastName,
+                            phone = phoneNumber,
+                            email = email.lowercase().trim(),
+                            password = password.trim(),
+                            position = "agent",
+                            agencyId = selectedAgencyId,
+                            imageUri = profilePhotoUri,
+                            contentResolver = context.contentResolver
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                OutlineButton(
+                    text = "Already have an account? Login",
+                    onClick = { navController.navigate("login") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

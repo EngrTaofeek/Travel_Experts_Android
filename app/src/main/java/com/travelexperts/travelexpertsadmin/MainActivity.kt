@@ -35,12 +35,11 @@ class MainActivity : ComponentActivity() {
         val splashscreen = installSplashScreen()
         var keepSplashScreen = true
 
-        var startDestination by mutableStateOf<String?>(null)
-        lifecycleScope.launch {
+        val startDestinationState = mutableStateOf<String?>(null)
 
+        lifecycleScope.launch {
             UserPreferences.isLoggedIn(applicationContext).collect { loggedIn ->
-                startDestination = if (loggedIn) Routes.HOME else Routes.ONBOARDING
-                keepSplashScreen = false
+                startDestinationState.value = if (loggedIn) Routes.HOME else Routes.ONBOARDING
             }
         }
 
@@ -132,7 +131,16 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { paddingValues ->
-                    NavGraph(navController = navController, startDestination = startDestination ?: Routes.ONBOARDING, modifier = Modifier.padding(paddingValues))
+                    val startDestination = startDestinationState.value
+
+                    if (startDestination != null) {
+                        NavGraph(
+                            navController = navController,
+                            startDestination = startDestination,
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+
                 }
             }
         }

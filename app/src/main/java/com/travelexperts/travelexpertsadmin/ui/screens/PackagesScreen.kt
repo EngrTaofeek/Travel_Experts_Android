@@ -27,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,8 @@ fun PackageCard(packageData: PackageData, onClick: () -> Unit) {
                 model = packageData.imageUrl?.let { if (it.startsWith("/")) "${BASE_URL.dropLast(1)}$it" else it }
                     ?: R.drawable.default_package,
                 contentDescription = "Package Image",
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier.size(80.dp),
+                contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(12.dp))
             Column {
